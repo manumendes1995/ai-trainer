@@ -1,0 +1,130 @@
+const video = document.getElementById("camera");
+const canvas = document.getElementById("overlay");
+const ctx = canvas.getContext("2d");
+const coach = document.getElementById("coach");
+const splash = document.getElementById("splash");
+const btnStart = document.getElementById("btnStart");
+const btnReset = document.getElementById("btnReset");
+const btnSave  = document.getElementById("btnSave");
+const btnHist  = document.getElementById("btnHistory");
+const btnClear = document.getElementById("btnClear");
+const btnCSV   = document.getElementById("btnExport");
+const exerciseSel = document.getElementById("exercise");
+const repsEl = document.getElementById("reps");
+const modeEl = document.getElementById("mode");
+const statusEl = document.getElementById("status");
+
+let detector=null, stream=null, running=false;
+let reps=0, lastPhase="down", dySmooth=0;
+
+const msg=t=>statusEl.textContent=t??""; const warn=t=>coach.textContent="⚠️ "+(t??"Ajusta postura"); const good=t=>coach.textContent="✔️ "+(t??"Postura ok");
+const showSplash=(txt="Carregando IA…")=>{ if(!splash) return; splash.style.display="grid"; const h=splash.querySelector("h2"); if(h) h.textContent=txt; };
+const hideSplash=()=>{ if(splash) splash.style.display="none"; };
+
+function getKP(poses,name){ const kp=poses[0]?.keypoints||[]; return kp.find(p=>p.name===name&&p.score>=0.25); }
+function angle(a,b,c){ if(!a||!b||!c) return null; const v1={x:a.x-b.x,y:a.y-b.y}, v2={x:c.x-b.x,y:c.y-b.y};
+  const dot=v1.x*v2.x+v1.y*v2.y, n1=Math.hypot(v1.x,v1.y), n2=Math.hypot(v2.x,v2.y); if(n1===0||n2===0) return null;
+  const cos=Math.max(-1,Math.min(1,dot/(n1*n2))); return Math.acos(cos)*180/Math.PI; }
+
+btnStart?.addEventListener("click", start);
+btnReset?.addEventListener("click", resetAll);
+btnSave ?.addEventListener("click", saveSession);
+btnHist ?.addEventListener("click", renderHistory);
+btnClear?.addEventListener("click", clearHistory);
+btnCSV  ?.addEventListener("click", exportCSV);
+exerciseSel?.addEventListener("change", ()=>{ modeEl.textContent=exerciseSel.options[exerciseSel.selectedIndex].textContent; resetAll(); });
+
+async function start(){
+  if(running) return; running=true; showSplash("A iniciar câmera e IA…"); msg("A abrir câmara…");
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({ video:{width:{ideal:640},height:{ideal:480},facingMode:"user"}, audio:false });
+    video.srcObject = stream; await new Promise(r=>{ if(video.readyState>=1) return r(); video.onloadedmetadata=()=>r(); }); await video.play();
+    canvas.width=video.videoWidth||640; canvas.height=video.videoHeight||480;
+    try{ await tf.setBackend("webgl"); await tf.ready(); } catch{ await tf.setBackend("wasm"); await tf.ready(); }
+    detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{ modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING, enableSmoothing:true });
+    hideSplash(); setTimeout(hideSplash,12000); msg("Pronto. A detetar…"); requestAnimationFrame(loop);
+  }catch(e){ hideSplash(); running=false; console.error(e); coach.textContent="Erro: "+(e?.message||e); msg("Erro ao iniciar (ver consola)."); }
+}
+
+async function loop(){
+  if(!running) return;
+  let poses=[]; try{ poses = detector? await detector.estimatePoses(video,{flipHorizontal:true}) : []; }catch(e){ console.error(e); warn("Falha ao estimar poses"); }
+  hideSplash(); draw(poses); const tip=evaluateAndCount(poses); if(tip) warn(tip); else good("Postura ok"); requestAnimationFrame(loop);
+}
+
+function draw(poses){
+  const w=canvas.width,h=canvas.height; ctx.clearRect(0,0,w,h); if(!poses.length) return; const kp=poses[0].keypoints||[];
+  kp.forEach(p=>{ if(p.score>0.5){ ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fillStyle="#22c55e"; ctx.fill(); } });
+  const L=n=>getKP(poses,"left_"+n), R=n=>getKP(poses,"right_"+n);
+  const segs=[[L("shoulder"),R("shoulder")],[L("hip"),R("hip")],[L("shoulder"),L("elbow")],[L("elbow"),L("wrist")],[R("shoulder"),R("elbow")],[R("elbow"),R("wrist")],[L("hip"),L("knee")],[L("knee"),L("ankle")],[R("hip"),R("knee")],[R("knee"),R("ankle")]];
+  ctx.strokeStyle="#60a5fa"; ctx.lineWidth=2; segs.forEach(([a,b])=>{ if(a&&b){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); } });
+}
+
+function evaluateAndCount(poses){
+  if(!poses.length) return "Aproxima-te e fica de frente";
+  const mode=exerciseSel.value; if(mode==="braco_direito") return evalArm(poses,"right");
+  if(mode==="braco_esquerdo") return evalArm(poses,"left"); if(mode==="agachamento") return evalSquat(poses); return "";
+}
+function evalArm(poses,side){
+  const s=getKP(poses,`${side}_shoulder`), e=getKP(poses,`${side}_elbow`), w=getKP(poses,`${side}_wrist`); if(!s||!w) return "Mostra ombro e pulso";
+  const dy=s.y-w.y; dySmooth=0.6*dySmooth+0.4*dy; const UP=18,DOWN=6;
+  if(lastPhase==="down"&&dySmooth>=UP) lastPhase="up"; else if(lastPhase==="up"&&dySmooth<=DOWN){ reps++; repsEl.textContent=reps; lastPhase="down"; }
+  const ang=angle(s,e,w); if(lastPhase==="down"&&ang!==null&&ang<160) return "Estica mais o braço";
+  if(lastPhase==="up"&&ang!==null&&ang>60) return "Sobe mais (fecha o cotovelo)"; if(lastPhase==="up"&&dy<8) return "Pulso acima do ombro"; return "";
+}
+function evalSquat(poses){
+  const hip=getKP(poses,"left_hip")||getKP(poses,"right_hip"), knee=getKP(poses,"left_knee")||getKP(poses,"right_knee"), ankle=getKP(poses,"left_ankle")||getKP(poses,"right_ankle");
+  const shL=getKP(poses,"left_shoulder"), shR=getKP(poses,"right_shoulder"); if(!hip||!knee) return "Mostra anca e joelho";
+  const depth=hip.y-knee.y; dySmooth=0.6*dySmooth+0.4*depth; const DOWN=8,UP=-6;
+  if(lastPhase==="down"&&dySmooth>=DOWN) lastPhase="up"; else if(lastPhase==="up"&&dySmooth<=UP){ reps++; repsEl.textContent=reps; lastPhase="down"; }
+  if(depth<6) return "Desce mais (anca abaixo do joelho)"; if(knee&&ankle&&Math.abs(knee.x-ankle.x)>45) return "Joelho alinhado com o pé";
+  if(shL&&shR){ const mid=(shL.x+shR.x)/2; if(Math.abs(mid-hip.x)>60) return "Estabiliza o tronco"; } return "";
+}
+
+function loadSessions(){ try{ return JSON.parse(localStorage.getItem("sessions")||"[]"); }catch{ return []; } }
+function saveSessions(a){ localStorage.setItem("sessions", JSON.stringify(a)); }
+function saveSession(){ const a=loadSessions(); a.push({data:new Date().toLocaleString(),exercicio:exerciseSel.value,reps}); saveSessions(a); msg("Sessão guardada ✅"); }
+function renderHistory(){ const a=loadSessions(); if(!a.length){ alert("Sem sessões guardadas."); return; } console.table(a); alert("Histórico na consola (F12)."); }
+function clearHistory(){ localStorage.removeItem("sessions"); msg("Histórico apagado."); }
+function exportCSV(){ const a=loadSessions(); if(!a.length) return msg("Sem dados.");
+  const header="data,exercicio,reps\n", rows=a.map(s=>`"${s.data}","${s.exercicio}",${s.reps}`).join("\n");
+  const blob=new Blob([header+rows],{type:"text/csv;charset=utf-8"}), url=URL.createObjectURL(blob);
+  const link=Object.assign(document.createElement("a"),{href:url,download:`treinos_${Date.now()}.csv`}); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url); msg("CSV exportado ✅");
+}
+function resetAll(){ reps=0; lastPhase="down"; dySmooth=0; repsEl.textContent="0"; msg("Reset efetuado."); }
+
+// ---- PATCH: auto-start + anti-travar ----
+function failStart(msgText, e){
+  console.error(e);
+  coach.textContent = "Erro: " + (msgText || (e?.message || e));
+  try { hideSplash(); } catch(_) {}
+  statusEl.textContent = "Falhou ao iniciar. Verifica internet e permissões da câmara.";
+  running = false;
+}
+
+// Se o start lançar erro, garantimos que o splash desaparece:
+(function wrapStart(){
+  const oldStart = start;
+  start = async function(){
+    try {
+      // se demorar >8s, mostramos aviso e escondemos splash
+      const slowTimer = setTimeout(()=>{
+        try { hideSplash(); } catch(_) {}
+        coach.textContent = "⚠️ Lento a carregar — verifica a internet e permite a câmara.";
+      }, 8000);
+
+      await oldStart();
+
+      clearTimeout(slowTimer);
+    } catch (e) {
+      failStart("Falha ao iniciar", e);
+    } finally {
+      try { hideSplash(); } catch(_) {}
+    }
+  };
+})();
+
+// Clicar automaticamente no botão ao carregar a página
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{ try { btnStart?.click(); } catch(_) {} }, 400);
+});

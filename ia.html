@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hello Camera + IA</title>
+
+  <!-- TensorFlow.js + Pose Detection (ORDEM IMPORTA) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.20.0/dist/tf-core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.20.0/dist/tf-converter.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.20.0/dist/tf-backend-webgl.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm@4.20.0/dist/tf-backend-wasm.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@4.0.0/dist/pose-detection.min.js"></script>
+
+  <style>
+    body { font-family: system-ui, Arial; margin: 16px; }
+    .wrap { position: relative; width: 640px; height: 480px; }
+    video, canvas { position: absolute; inset: 0; width: 640px; height: 480px; }
+    canvas { z-index: 1; pointer-events: none; }
+    .hud { margin-top: 8px; font-weight: 600; }
+    button { padding: 8px 12px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Hello Camera 📸 + IA</h1>
+
+  <div class="wrap">
+    <video id="camera" autoplay playsinline muted></video>
+    <canvas id="overlay" width="640" height="480"></canvas>
+  </div>
+
+  <div class="hud">
+    <button id="btnStart">Abrir Câmera</button>
+    <span id="status">Pronto…</span>
+  </div>
+
+  <!-- O teu JS vem DEPOIS dos scripts acima -->
+  <script src="ia.js"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(console.error);
+    }
+  </script>
+</body>
+</html>
