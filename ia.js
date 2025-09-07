@@ -2,6 +2,7 @@
 const video = document.getElementById("camera");
 const canvas = document.getElementById("overlay");
 const ctx = canvas.getContext("2d");
+
 const statusEl = document.getElementById("status");
 const tipEl = document.getElementById("tip");
 const repsEl = document.getElementById("reps");
@@ -114,7 +115,7 @@ async function initTF(){
     await tf.setBackend('webgl');
     await tf.ready();
   }catch{
-    // se der erro no WebGL, o TF tenta fallback
+    // fallback automático
   }
   detector = await poseDetection.createDetector(
     poseDetection.SupportedModels.MoveNet,
@@ -133,7 +134,7 @@ function draw(poses){
   setStatus("Detetado ✅");
 
   const kp = poses[0].keypoints || [];
-  // desenha pontos (discreto)
+  // desenhar pontos discretos
   ctx.fillStyle = "#00e676";
   kp.forEach(p=>{
     if (p.score>0.5){
@@ -141,45 +142,28 @@ function draw(poses){
     }
   });
 
-  // rep counter MUITO simples (ex.: braço direito)
+  // rep counter simples (braço direito)
   const rightWrist = kp.find(p=>p.name?.includes("right_wrist"));
   const rightShoulder = kp.find(p=>p.name?.includes("right_shoulder"));
   if (exerciseSel.value === "rightArm" && rightWrist && rightShoulder){
-    if (rightWrist.y + 30 < rightShoulder.y && phase==="down"){ // braço subiu
-      phase = "up";
-    }
-    if (rightWrist.y > rightShoulder.y + 30 && phase==="up"){ // braço desceu = 1 rep
-      phase = "down";
-      reps++; repsEl.textContent = reps;
-      maybeGoal();
-      setTip("Boa! Continua 💪");
-    }
+    if (rightWrist.y + 30 < rightShoulder.y && phase==="down"){ phase = "up"; }
+    if (rightWrist.y > rightShoulder.y + 30 && phase==="up"){ phase = "down"; reps++; repsEl.textContent = reps; maybeGoal(); setTip("Boa! Continua 💪"); }
   }
 
-  // notas rápidas
   if (exerciseSel.value === "leftArm"){
-    if (performance.now()-lastTipAt>3000) setTip("Levanta e baixa o braço esquerdo até ao ombro para contar.");
+    if (performance.now()-lastTipAt>3000) setTip("Levanta e baixa o braço esquerdo até ao ombro.");
   } else if (exerciseSel.value === "squat"){
     if (performance.now()-lastTipAt>3000) setTip("Dobra os joelhos (quadris abaixo do joelho) e volta a subir.");
   }
 }
 function maybeGoal(){
   const goal = parseInt(goalEl.value||"0",10);
-  if (goal>0 && reps>=goal){
-    setTip("Meta atingida ✅");
-    try { new AudioContext().resume().then(()=>{}); } catch(e){}
-  }
+  if (goal>0 && reps>=goal){ setTip("Meta atingida ✅"); }
 }
 
 // ====== Histórico ======
 function saveSession(){
-  const item = {
-    ts: new Date().toISOString(),
-    exercise: exerciseSel.value,
-    reps,
-    goal: parseInt(goalEl.value||"0",10),
-    duration: timerEl.textContent
-  };
+  const item = { ts:new Date().toISOString(), exercise:exerciseSel.value, reps, goal:parseInt(goalEl.value||"0",10), duration:timerEl.textContent };
   const arr = JSON.parse(localStorage.getItem("ai.trainer.hist") || "[]");
   arr.push(item);
   localStorage.setItem("ai.trainer.hist", JSON.stringify(arr));

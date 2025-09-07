@@ -16,7 +16,7 @@
     :root { --bg:#0b1220; --card:#121a2a; --txt:#e6eefc; --muted:#9bb0d6; --acc:#2563eb; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; color: var(--txt); background: linear-gradient(180deg,#0b1220 0%, #0f1830 100%); }
-    header { padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #152040; background: rgba(0,0,0,.2); position: sticky; top:0; backdrop-filter: blur(6px); }
+    header { padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #152040; background: rgba(0,0,0,.2); position: sticky; top:0; backdrop-filter: blur(6px); z-index: 10; }
     header img { width: 32px; height: 32px; border-radius: 8px; }
     header h1 { font-size: 18px; margin: 0; letter-spacing: .3px; }
     main { max-width: 960px; margin: 16px auto; padding: 0 16px 32px; }
@@ -42,7 +42,7 @@
     @media (max-width: 880px){ .grid{ grid-template-columns: 1fr; } }
   </style>
 
-  <!-- TensorFlow.js + Pose Detection (CDN estável) -->
+  <!-- TensorFlow.js + Pose Detection (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.20.0/dist/tf-core.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.20.0/dist/tf-converter.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.20.0/dist/tf-backend-webgl.min.js"></script>

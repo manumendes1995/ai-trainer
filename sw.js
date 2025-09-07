@@ -1,13 +1,46 @@
-const CACHE="ai-trainer-v6"; // <- nova versão
-const ASSETS=["/","/ai-deploy.html","/ia.js","/manifest.json","/icon-192.png","/icon-512.png","/favicon.ico"];
-self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))); self.skipWaiting();});
-self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))); self.clients.claim();});
-self.addEventListener("fetch",e=>{
-  const r=e.request;
-  e.respondWith(
-    caches.match(r,{ignoreSearch:true}).then(c=>c||fetch(r).then(res=>{
-      if(r.method==="GET"&&res&&res.status===200){ const cp=res.clone(); caches.open(CACHE).then(cc=>cc.put(r,cp)).catch(()=>{}); }
-      return res;
-    }).catch(()=> r.mode==="navigate" ? caches.match("/ai-deploy.html") : Promise.reject()))
+const CACHE = "ai-trainer-v7";
+const ASSETS = [
+  "/",
+  "/index.html",
+  "/ai-deploy.html",
+  "/ia.js",
+  "/manifest.json",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/favicon.ico"
+];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
+  self.skipWaiting();
+  console.log("SW: instalado ✅");
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
+  console.log("SW: ativo ✅");
+});
+
+self.addEventListener("fetch", (event) => {
+  const req = event.request;
+  event.respondWith(
+    caches.match(req).then((cacheResp) =>
+      cacheResp ||
+      fetch(req).then((netResp) => {
+        const copy = netResp.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy));
+        return netResp;
+      }).catch(() => cacheFallback(req))
+    )
   );
 });
+
+function cacheFallback(req){
+  if (req.mode === "navigate") return caches.match("/ai-deploy.html");
+  return new Response("", { status: 404 });
+}
