@@ -5,94 +5,101 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AI Trainer</title>
 
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
-  <meta name="theme-color" content="#2563eb" />
+  <link rel="icon" href="favicon.ico" sizes="any" />
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
 
-  <!-- TensorFlow.js + Pose Detection (CDN) -->
+  <style>
+    :root { --bg:#0b1220; --card:#121a2a; --txt:#e6eefc; --muted:#9bb0d6; --acc:#2563eb; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; color: var(--txt); background: linear-gradient(180deg,#0b1220 0%, #0f1830 100%); }
+    header { padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #152040; background: rgba(0,0,0,.2); position: sticky; top:0; backdrop-filter: blur(6px); }
+    header img { width: 32px; height: 32px; border-radius: 8px; }
+    header h1 { font-size: 18px; margin: 0; letter-spacing: .3px; }
+    main { max-width: 960px; margin: 16px auto; padding: 0 16px 32px; }
+    .grid { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+    .card { background: var(--card); border: 1px solid #1a2748; border-radius: 12px; padding: 12px; }
+    .videoWrap { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 4/3; background:#050a18; border:1px solid #1a2748; }
+    video, canvas { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+    canvas#overlay { pointer-events:none; }
+    .hud { display:flex; flex-wrap: wrap; gap:8px; margin-top: 12px; }
+    .hud button, .hud select, .hud input { background:#0e1a33; color:var(--txt); border:1px solid #203059; border-radius:8px; padding:8px 12px; font-weight:600; }
+    .hud button:hover { border-color: var(--acc); }
+    .hud .ok { border-color: var(--ok); }
+    .hud .danger { border-color: var(--bad); }
+    .hud .primary { background: #112552; border-color: var(--acc); }
+    .row { display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap; }
+    .pill { padding:6px 10px; border-radius:999px; background:#0e1a33; border:1px solid #203059; color:var(--muted); }
+    .stat { font-weight:700; color: var(--txt); }
+    .tip { margin-top: 10px; color: var(--muted); font-size: 14px; min-height: 20px; }
+    .history table { width:100%; border-collapse: collapse; }
+    .history th, .history td { border-bottom: 1px solid #1a2748; padding: 8px; text-align: left; font-size: 14px; }
+    .history th { color:#b9c9ef; font-weight:700; }
+    footer { text-align:center; color:var(--muted); font-size:12px; margin-top:16px; }
+    @media (max-width: 880px){ .grid{ grid-template-columns: 1fr; } }
+  </style>
+
+  <!-- TensorFlow.js + Pose Detection (CDN estável) -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.20.0/dist/tf-core.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.20.0/dist/tf-converter.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.20.0/dist/tf-backend-webgl.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
-
-  <style>
-    :root { color-scheme: dark; }
-    body{margin:0;background:#0b1220;color:#fff;font-family:system-ui,Arial}
-    h1{margin:16px;text-align:center;color:#60a5fa}
-    .wrap{position:relative;width:min(640px,96vw);aspect-ratio:4/3;margin:0 auto;border-radius:12px;overflow:hidden;background:#111}
-    video,canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-    canvas{pointer-events:none}
-    .hud{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin:14px 8px}
-    button,select,input{padding:10px 14px;border:none;border-radius:10px;font-weight:700}
-    button{background:#2563eb;color:#fff;cursor:pointer}
-    button:disabled{opacity:.6}
-    .pill{padding:8px 12px;border-radius:999px;background:#1e293b}
-    #status{display:block;text-align:center;color:#9fb7ff;margin:6px}
-    /* Modal histórico */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center;z-index:50}
-    .card{background:#0f172a;border:1px solid #334155;border-radius:12px;width:min(680px,94vw);max-height:80vh;overflow:auto;padding:16px}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:8px;border-bottom:1px solid #1f2937;text-align:left}
-  </style>
 </head>
 <body>
-  <h1>AI Trainer</h1>
+  <header>
+    <img src="icon-192.png" alt="AI Trainer" />
+    <h1>AI Trainer</h1>
+    <span class="pill" id="status">Pronto…</span>
+  </header>
 
-  <div class="wrap">
-    <video id="camera" autoplay playsinline muted></video>
-    <canvas id="overlay" width="640" height="480"></canvas>
-  </div>
+  <main>
+    <div class="grid">
+      <section class="card">
+        <div class="videoWrap">
+          <video id="camera" playsinline muted></video>
+          <canvas id="overlay"></canvas>
+        </div>
 
-  <div class="hud">
-    <button id="btnStart">📷 <span data-i18n="start">Abrir Câmera</span></button>
-    <button id="btnReset">♻️ <span data-i18n="reset">Reset</span></button>
+        <div class="hud">
+          <button id="btnStart" class="primary">▶️ Iniciar</button>
+          <button id="btnStop" class="danger">⏹️ Parar</button>
+          <button id="btnPhoto">📸 Foto</button>
+          <button id="btnRecord" class="ok">● Gravar</button>
+          <button id="btnDownload" disabled>⬇️ Guardar Vídeo</button>
 
-    <label class="pill">
-      <span data-i18n="exercise">Exercício</span>:
-      <select id="exercise">
-        <option value="braco_direito" data-i18n="rightArm">Braço Direito</option>
-        <option value="braco_esquerdo" data-i18n="leftArm">Braço Esquerdo</option>
-        <option value="agachamento" data-i18n="squat">Agachamento</option>
-      </select>
-    </label>
+          <select id="exercise">
+            <option value="rightArm">Braço direito</option>
+            <option value="leftArm">Braço esquerdo</option>
+            <option value="squat">Agachamento</option>
+          </select>
 
-    <label class="pill">
-      <span data-i18n="goal">Meta</span>:
-      <input id="goal" type="number" min="1" value="20" style="width:80px;font-weight:700;background:transparent;color:#fff;border:1px solid #334155;border-radius:8px;padding:6px 8px" />
-      <span data-i18n="repsShort">reps</span>
-    </label>
+          <label>Meta:
+            <input id="goal" type="number" min="1" step="1" value="10" style="width:80px" />
+          </label>
 
-    <span class="pill"><span data-i18n="reps">Reps</span>: <strong id="reps">0</strong></span>
-    <span class="pill">⏱️ <strong id="timer">00:00</strong></span>
+          <span class="pill">Reps: <span class="stat" id="reps">0</span></span>
+          <span class="pill">⏱ <span class="stat" id="timer">00:00</span></span>
+        </div>
 
-    <button id="btnSave">💾 <span data-i18n="save">Guardar</span></button>
-    <button id="btnHistory">📜 <span data-i18n="history">Histórico</span></button>
-    <button id="btnClear">🗑️ <span data-i18n="clear">Apagar Histórico</span></button>
-    <button id="btnExport">📤 <span data-i18n="export">Exportar CSV</span></button>
-  </div>
+        <div class="tip" id="tip">Dica: mantenha-se centrada/o e com boa luz ✨</div>
+      </section>
 
-  <span id="status">Pronto…</span>
-
-  <!-- Modal Histórico -->
-  <div id="historyModal" class="modal">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <h3 style="margin:0" data-i18n="historyTitle">Histórico de Sessões</h3>
-        <button id="closeHist">✖</button>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th data-i18n="date">Data</th>
-            <th data-i18n="exercise">Exercício</th>
-            <th data-i18n="reps">Reps</th>
-            <th data-i18n="duration">Duração</th>
-          </tr>
-        </thead>
-        <tbody id="histBody"></tbody>
-      </table>
+      <aside class="card history">
+        <div class="row">
+          <button id="btnSave">💾 Guardar</button>
+          <button id="btnHistory">📜 Histórico</button>
+          <button id="btnClear" class="danger">🗑️ Apagar Histórico</button>
+          <button id="btnExport">📤 Exportar CSV</button>
+        </div>
+        <div id="historyTable" style="margin-top:10px;"></div>
+      </aside>
     </div>
-  </div>
+
+    <footer>Funciona offline. Instala no telemóvel pelo menu “Adicionar ao ecrã inicial”.</footer>
+  </main>
 
   <script src="ia.js"></script>
   <script>
@@ -102,5 +109,3 @@
   </script>
 </body>
 </html>
-
-<!-- ui-bust:1757086187 -->
