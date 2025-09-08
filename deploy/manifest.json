@@ -1,12 +1,9 @@
 {
-  "name": "Hello Camera + IA",
-  "short_name": "Camera IA",
-  "description": "Conta repetições com IA, dá dicas de postura e guarda histórico — funciona offline.",
+  "name": "AI Trainer",
+  "short_name": "AI Trainer",
   "start_url": "/ai-deploy.html",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "fullscreen", "minimal-ui", "browser"],
-  "orientation": "portrait",
   "background_color": "#0b1220",
   "theme_color": "#2563eb",
   "icons": [

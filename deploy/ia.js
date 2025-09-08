@@ -1,130 +1,231 @@
+// ====== Seletores ======
 const video = document.getElementById("camera");
 const canvas = document.getElementById("overlay");
 const ctx = canvas.getContext("2d");
-const coach = document.getElementById("coach");
-const splash = document.getElementById("splash");
-const btnStart = document.getElementById("btnStart");
-const btnReset = document.getElementById("btnReset");
-const btnSave  = document.getElementById("btnSave");
-const btnHist  = document.getElementById("btnHistory");
-const btnClear = document.getElementById("btnClear");
-const btnCSV   = document.getElementById("btnExport");
-const exerciseSel = document.getElementById("exercise");
-const repsEl = document.getElementById("reps");
-const modeEl = document.getElementById("mode");
+
 const statusEl = document.getElementById("status");
+const tipEl = document.getElementById("tip");
+const repsEl = document.getElementById("reps");
+const timerEl = document.getElementById("timer");
+const goalEl = document.getElementById("goal");
+const exerciseSel = document.getElementById("exercise");
 
-let detector=null, stream=null, running=false;
-let reps=0, lastPhase="down", dySmooth=0;
+const btnStart = document.getElementById("btnStart");
+const btnStop = document.getElementById("btnStop");
+const btnPhoto = document.getElementById("btnPhoto");
+const btnRecord = document.getElementById("btnRecord");
+const btnDownload = document.getElementById("btnDownload");
 
-const msg=t=>statusEl.textContent=t??""; const warn=t=>coach.textContent="⚠️ "+(t??"Ajusta postura"); const good=t=>coach.textContent="✔️ "+(t??"Postura ok");
-const showSplash=(txt="Carregando IA…")=>{ if(!splash) return; splash.style.display="grid"; const h=splash.querySelector("h2"); if(h) h.textContent=txt; };
-const hideSplash=()=>{ if(splash) splash.style.display="none"; };
+const btnSave = document.getElementById("btnSave");
+const btnHistory = document.getElementById("btnHistory");
+const btnClear = document.getElementById("btnClear");
+const btnExport = document.getElementById("btnExport");
+const historyTable = document.getElementById("historyTable");
 
-function getKP(poses,name){ const kp=poses[0]?.keypoints||[]; return kp.find(p=>p.name===name&&p.score>=0.25); }
-function angle(a,b,c){ if(!a||!b||!c) return null; const v1={x:a.x-b.x,y:a.y-b.y}, v2={x:c.x-b.x,y:c.y-b.y};
-  const dot=v1.x*v2.x+v1.y*v2.y, n1=Math.hypot(v1.x,v1.y), n2=Math.hypot(v2.x,v2.y); if(n1===0||n2===0) return null;
-  const cos=Math.max(-1,Math.min(1,dot/(n1*n2))); return Math.acos(cos)*180/Math.PI; }
+// ====== Estado ======
+let detector, stream = null, raf = 0;
+let recording = false, mediaRecorder = null, chunks = [];
+let startAt = 0, timerId = 0;
+let reps = 0, phase = "down"; // para rep counting simples
+let lastTipAt = 0;
 
-btnStart?.addEventListener("click", start);
-btnReset?.addEventListener("click", resetAll);
-btnSave ?.addEventListener("click", saveSession);
-btnHist ?.addEventListener("click", renderHistory);
-btnClear?.addEventListener("click", clearHistory);
-btnCSV  ?.addEventListener("click", exportCSV);
-exerciseSel?.addEventListener("change", ()=>{ modeEl.textContent=exerciseSel.options[exerciseSel.selectedIndex].textContent; resetAll(); });
+// ====== Util ======
+const fmt = (n) => n.toString().padStart(2, "0");
+function setStatus(txt){ statusEl.textContent = txt; }
+function setTip(txt){ tipEl.textContent = txt; lastTipAt = performance.now(); }
+function nowSec(){ return Math.floor((performance.now()-startAt)/1000); }
 
-async function start(){
-  if(running) return; running=true; showSplash("A iniciar câmera e IA…"); msg("A abrir câmara…");
+// ====== Câmara ======
+async function startCamera(){
+  if (stream) return;
+  stream = await navigator.mediaDevices.getUserMedia({ video: { width:1280, height:720 }, audio:false });
+  video.srcObject = stream;
+  await video.play();
+  resizeCanvas();
+}
+function stopCamera(){
+  if (!stream) return;
+  stream.getTracks().forEach(t=>t.stop());
+  stream = null;
+  video.srcObject = null;
+  cancelAnimationFrame(raf);
+}
+function resizeCanvas(){
+  const r = video.getBoundingClientRect();
+  const w = video.videoWidth || r.width;
+  const h = video.videoHeight || r.height;
+  canvas.width = w;
+  canvas.height = h;
+}
+
+// ====== Timer ======
+function startTimer(){
+  startAt = performance.now();
+  timerId = setInterval(()=>{
+    const s = nowSec();
+    timerEl.textContent = `${fmt(Math.floor(s/60))}:${fmt(s%60)}`;
+  }, 1000);
+}
+function stopTimer(){
+  clearInterval(timerId);
+}
+
+// ====== Foto ======
+function takePhoto(){
+  if (!stream){ setTip("Abra a câmara primeiro."); return; }
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const url = canvas.toDataURL("image/png");
+  const a = document.createElement("a");
+  a.href = url; a.download = `ai-trainer-foto-${Date.now()}.png`; a.click();
+  setTip("Foto guardada 📸");
+}
+
+// ====== Vídeo ======
+function toggleRecord(){
+  if (!stream){ setTip("Abra a câmara primeiro."); return; }
+  if (!recording){
+    chunks = [];
+    mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9,opus" });
+    mediaRecorder.ondataavailable = e=>{ if(e.data.size>0) chunks.push(e.data); };
+    mediaRecorder.onstop = ()=>{
+      const blob = new Blob(chunks, { type:"video/webm" });
+      const url = URL.createObjectURL(blob);
+      btnDownload.disabled = false;
+      btnDownload.onclick = ()=>{
+        const a = document.createElement("a");
+        a.href = url; a.download = `ai-trainer-video-${Date.now()}.webm`; a.click();
+        URL.revokeObjectURL(url);
+      };
+      setTip("Gravação concluída. Clique “Guardar Vídeo”.");
+    };
+    mediaRecorder.start();
+    recording = true;
+    btnRecord.textContent = "⏹️ Parar gravação";
+    setTip("A gravar vídeo…");
+  } else {
+    mediaRecorder?.stop();
+    recording = false;
+    btnRecord.textContent = "● Gravar";
+  }
+}
+
+// ====== IA (Pose Detection) ======
+async function initTF(){
   try{
-    stream = await navigator.mediaDevices.getUserMedia({ video:{width:{ideal:640},height:{ideal:480},facingMode:"user"}, audio:false });
-    video.srcObject = stream; await new Promise(r=>{ if(video.readyState>=1) return r(); video.onloadedmetadata=()=>r(); }); await video.play();
-    canvas.width=video.videoWidth||640; canvas.height=video.videoHeight||480;
-    try{ await tf.setBackend("webgl"); await tf.ready(); } catch{ await tf.setBackend("wasm"); await tf.ready(); }
-    detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{ modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING, enableSmoothing:true });
-    hideSplash(); setTimeout(hideSplash,12000); msg("Pronto. A detetar…"); requestAnimationFrame(loop);
-  }catch(e){ hideSplash(); running=false; console.error(e); coach.textContent="Erro: "+(e?.message||e); msg("Erro ao iniciar (ver consola)."); }
+    await tf.setBackend('webgl');
+    await tf.ready();
+  }catch{
+    // fallback automático
+  }
+  detector = await poseDetection.createDetector(
+    poseDetection.SupportedModels.MoveNet,
+    { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
+  );
 }
-
 async function loop(){
-  if(!running) return;
-  let poses=[]; try{ poses = detector? await detector.estimatePoses(video,{flipHorizontal:true}) : []; }catch(e){ console.error(e); warn("Falha ao estimar poses"); }
-  hideSplash(); draw(poses); const tip=evaluateAndCount(poses); if(tip) warn(tip); else good("Postura ok"); requestAnimationFrame(loop);
+  if (!stream) return;
+  const poses = await detector.estimatePoses(video, { flipHorizontal: true });
+  draw(poses);
+  raf = requestAnimationFrame(loop);
 }
-
 function draw(poses){
-  const w=canvas.width,h=canvas.height; ctx.clearRect(0,0,w,h); if(!poses.length) return; const kp=poses[0].keypoints||[];
-  kp.forEach(p=>{ if(p.score>0.5){ ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fillStyle="#22c55e"; ctx.fill(); } });
-  const L=n=>getKP(poses,"left_"+n), R=n=>getKP(poses,"right_"+n);
-  const segs=[[L("shoulder"),R("shoulder")],[L("hip"),R("hip")],[L("shoulder"),L("elbow")],[L("elbow"),L("wrist")],[R("shoulder"),R("elbow")],[R("elbow"),R("wrist")],[L("hip"),L("knee")],[L("knee"),L("ankle")],[R("hip"),R("knee")],[R("knee"),R("ankle")]];
-  ctx.strokeStyle="#60a5fa"; ctx.lineWidth=2; segs.forEach(([a,b])=>{ if(a&&b){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); } });
-}
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if (!poses.length){ setStatus("A procurar pessoa…"); return; }
+  setStatus("Detetado ✅");
 
-function evaluateAndCount(poses){
-  if(!poses.length) return "Aproxima-te e fica de frente";
-  const mode=exerciseSel.value; if(mode==="braco_direito") return evalArm(poses,"right");
-  if(mode==="braco_esquerdo") return evalArm(poses,"left"); if(mode==="agachamento") return evalSquat(poses); return "";
-}
-function evalArm(poses,side){
-  const s=getKP(poses,`${side}_shoulder`), e=getKP(poses,`${side}_elbow`), w=getKP(poses,`${side}_wrist`); if(!s||!w) return "Mostra ombro e pulso";
-  const dy=s.y-w.y; dySmooth=0.6*dySmooth+0.4*dy; const UP=18,DOWN=6;
-  if(lastPhase==="down"&&dySmooth>=UP) lastPhase="up"; else if(lastPhase==="up"&&dySmooth<=DOWN){ reps++; repsEl.textContent=reps; lastPhase="down"; }
-  const ang=angle(s,e,w); if(lastPhase==="down"&&ang!==null&&ang<160) return "Estica mais o braço";
-  if(lastPhase==="up"&&ang!==null&&ang>60) return "Sobe mais (fecha o cotovelo)"; if(lastPhase==="up"&&dy<8) return "Pulso acima do ombro"; return "";
-}
-function evalSquat(poses){
-  const hip=getKP(poses,"left_hip")||getKP(poses,"right_hip"), knee=getKP(poses,"left_knee")||getKP(poses,"right_knee"), ankle=getKP(poses,"left_ankle")||getKP(poses,"right_ankle");
-  const shL=getKP(poses,"left_shoulder"), shR=getKP(poses,"right_shoulder"); if(!hip||!knee) return "Mostra anca e joelho";
-  const depth=hip.y-knee.y; dySmooth=0.6*dySmooth+0.4*depth; const DOWN=8,UP=-6;
-  if(lastPhase==="down"&&dySmooth>=DOWN) lastPhase="up"; else if(lastPhase==="up"&&dySmooth<=UP){ reps++; repsEl.textContent=reps; lastPhase="down"; }
-  if(depth<6) return "Desce mais (anca abaixo do joelho)"; if(knee&&ankle&&Math.abs(knee.x-ankle.x)>45) return "Joelho alinhado com o pé";
-  if(shL&&shR){ const mid=(shL.x+shR.x)/2; if(Math.abs(mid-hip.x)>60) return "Estabiliza o tronco"; } return "";
-}
-
-function loadSessions(){ try{ return JSON.parse(localStorage.getItem("sessions")||"[]"); }catch{ return []; } }
-function saveSessions(a){ localStorage.setItem("sessions", JSON.stringify(a)); }
-function saveSession(){ const a=loadSessions(); a.push({data:new Date().toLocaleString(),exercicio:exerciseSel.value,reps}); saveSessions(a); msg("Sessão guardada ✅"); }
-function renderHistory(){ const a=loadSessions(); if(!a.length){ alert("Sem sessões guardadas."); return; } console.table(a); alert("Histórico na consola (F12)."); }
-function clearHistory(){ localStorage.removeItem("sessions"); msg("Histórico apagado."); }
-function exportCSV(){ const a=loadSessions(); if(!a.length) return msg("Sem dados.");
-  const header="data,exercicio,reps\n", rows=a.map(s=>`"${s.data}","${s.exercicio}",${s.reps}`).join("\n");
-  const blob=new Blob([header+rows],{type:"text/csv;charset=utf-8"}), url=URL.createObjectURL(blob);
-  const link=Object.assign(document.createElement("a"),{href:url,download:`treinos_${Date.now()}.csv`}); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url); msg("CSV exportado ✅");
-}
-function resetAll(){ reps=0; lastPhase="down"; dySmooth=0; repsEl.textContent="0"; msg("Reset efetuado."); }
-
-// ---- PATCH: auto-start + anti-travar ----
-function failStart(msgText, e){
-  console.error(e);
-  coach.textContent = "Erro: " + (msgText || (e?.message || e));
-  try { hideSplash(); } catch(_) {}
-  statusEl.textContent = "Falhou ao iniciar. Verifica internet e permissões da câmara.";
-  running = false;
-}
-
-// Se o start lançar erro, garantimos que o splash desaparece:
-(function wrapStart(){
-  const oldStart = start;
-  start = async function(){
-    try {
-      // se demorar >8s, mostramos aviso e escondemos splash
-      const slowTimer = setTimeout(()=>{
-        try { hideSplash(); } catch(_) {}
-        coach.textContent = "⚠️ Lento a carregar — verifica a internet e permite a câmara.";
-      }, 8000);
-
-      await oldStart();
-
-      clearTimeout(slowTimer);
-    } catch (e) {
-      failStart("Falha ao iniciar", e);
-    } finally {
-      try { hideSplash(); } catch(_) {}
+  const kp = poses[0].keypoints || [];
+  // desenhar pontos discretos
+  ctx.fillStyle = "#00e676";
+  kp.forEach(p=>{
+    if (p.score>0.5){
+      ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2); ctx.fill();
     }
-  };
-})();
+  });
 
-// Clicar automaticamente no botão ao carregar a página
-window.addEventListener('load', ()=>{
-  setTimeout(()=>{ try { btnStart?.click(); } catch(_) {} }, 400);
+  // rep counter simples (braço direito)
+  const rightWrist = kp.find(p=>p.name?.includes("right_wrist"));
+  const rightShoulder = kp.find(p=>p.name?.includes("right_shoulder"));
+  if (exerciseSel.value === "rightArm" && rightWrist && rightShoulder){
+    if (rightWrist.y + 30 < rightShoulder.y && phase==="down"){ phase = "up"; }
+    if (rightWrist.y > rightShoulder.y + 30 && phase==="up"){ phase = "down"; reps++; repsEl.textContent = reps; maybeGoal(); setTip("Boa! Continua 💪"); }
+  }
+
+  if (exerciseSel.value === "leftArm"){
+    if (performance.now()-lastTipAt>3000) setTip("Levanta e baixa o braço esquerdo até ao ombro.");
+  } else if (exerciseSel.value === "squat"){
+    if (performance.now()-lastTipAt>3000) setTip("Dobra os joelhos (quadris abaixo do joelho) e volta a subir.");
+  }
+}
+function maybeGoal(){
+  const goal = parseInt(goalEl.value||"0",10);
+  if (goal>0 && reps>=goal){ setTip("Meta atingida ✅"); }
+}
+
+// ====== Histórico ======
+function saveSession(){
+  const item = { ts:new Date().toISOString(), exercise:exerciseSel.value, reps, goal:parseInt(goalEl.value||"0",10), duration:timerEl.textContent };
+  const arr = JSON.parse(localStorage.getItem("ai.trainer.hist") || "[]");
+  arr.push(item);
+  localStorage.setItem("ai.trainer.hist", JSON.stringify(arr));
+  setTip("Sessão guardada 💾");
+}
+function showHistory(){
+  const arr = JSON.parse(localStorage.getItem("ai.trainer.hist") || "[]");
+  if (!arr.length){ historyTable.innerHTML = "<p>Sem registos ainda.</p>"; return; }
+  let html = "<table><thead><tr><th>Data</th><th>Exercício</th><th>Reps</th><th>Meta</th><th>Duração</th></tr></thead><tbody>";
+  arr.forEach(i=>{
+    html += `<tr><td>${new Date(i.ts).toLocaleString()}</td><td>${i.exercise}</td><td>${i.reps}</td><td>${i.goal}</td><td>${i.duration}</td></tr>`;
+  });
+  html += "</tbody></table>";
+  historyTable.innerHTML = html;
+}
+function clearHistory(){
+  localStorage.removeItem("ai.trainer.hist");
+  historyTable.innerHTML = "<p>Histórico apagado.</p>";
+}
+function exportCSV(){
+  const arr = JSON.parse(localStorage.getItem("ai.trainer.hist") || "[]");
+  if (!arr.length){ setTip("Nada para exportar."); return; }
+  const rows = [["data","exercicio","reps","goal","duracao"], ...arr.map(i=>[i.ts,i.exercise,i.reps,i.goal,i.duration])];
+  const csv = rows.map(r=>r.map(v => `"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "ai-trainer-historico.csv"; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ====== Eventos UI ======
+btnStart.addEventListener("click", async ()=>{
+  try{
+    btnDownload.disabled = true;
+    reps = 0; repsEl.textContent = "0"; phase="down";
+    setStatus("A abrir câmara…");
+    await startCamera();
+    await initTF();
+    startTimer();
+    loop();
+    setTip("Treino iniciado ✅");
+  }catch(e){
+    console.error(e);
+    setTip("Erro ao iniciar: "+e.message);
+  }
 });
+btnStop.addEventListener("click", ()=>{
+  stopTimer();
+  stopCamera();
+  cancelAnimationFrame(raf);
+  setStatus("Parado ⏹️");
+  setTip("Treino parado.");
+});
+btnPhoto.addEventListener("click", takePhoto);
+btnRecord.addEventListener("click", toggleRecord);
+
+btnSave.addEventListener("click", saveSession);
+btnHistory.addEventListener("click", showHistory);
+btnClear.addEventListener("click", clearHistory);
+btnExport.addEventListener("click", exportCSV);
+
+// Ajustar canvas quando o vídeo ficar pronto
+video.addEventListener("loadedmetadata", resizeCanvas);
+window.addEventListener("resize", resizeCanvas);

@@ -26,7 +26,7 @@ const historyTable = document.getElementById("historyTable");
 let detector, stream = null, raf = 0;
 let recording = false, mediaRecorder = null, chunks = [];
 let startAt = 0, timerId = 0;
-let reps = 0, phase = "down"; // para rep counting simples
+let reps = 0, phase = "down";
 let lastTipAt = 0;
 
 // ====== Util ======
@@ -147,13 +147,19 @@ function draw(poses){
   const rightShoulder = kp.find(p=>p.name?.includes("right_shoulder"));
   if (exerciseSel.value === "rightArm" && rightWrist && rightShoulder){
     if (rightWrist.y + 30 < rightShoulder.y && phase==="down"){ phase = "up"; }
-    if (rightWrist.y > rightShoulder.y + 30 && phase==="up"){ phase = "down"; reps++; repsEl.textContent = reps; maybeGoal(); setTip("Boa! Continua 💪"); }
+    if (rightWrist.y > rightShoulder.y + 30 && phase==="up"){
+      phase = "down";
+      reps++; repsEl.textContent = reps;
+      maybeGoal();
+      setTip("Boa! Continua 💪");
+    }
   }
 
   if (exerciseSel.value === "leftArm"){
     if (performance.now()-lastTipAt>3000) setTip("Levanta e baixa o braço esquerdo até ao ombro.");
   } else if (exerciseSel.value === "squat"){
-    if (performance.now()-lastTipAt>3000) setTip("Dobra os joelhos (quadris abaixo do joelho) e volta a subir.");
+    if (performance.now>-3000){} // noop
+    if (performance.now()-lastTipAt>3000) setTip("Dobra os joelhos e volta a subir.");
   }
 }
 function maybeGoal(){
@@ -187,7 +193,7 @@ function exportCSV(){
   const arr = JSON.parse(localStorage.getItem("ai.trainer.hist") || "[]");
   if (!arr.length){ setTip("Nada para exportar."); return; }
   const rows = [["data","exercicio","reps","goal","duracao"], ...arr.map(i=>[i.ts,i.exercise,i.reps,i.goal,i.duration])];
-  const csv = rows.map(r=>r.map(v => `"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");
+  const csv = rows.map(r=>r.map(v => \`"\${String(v).replaceAll('"','""')}"\`).join(",")).join("\\n");
   const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
