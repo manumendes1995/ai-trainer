@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Trainer</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="favicon.ico" sizes="any" />
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <style>
+    :root{--bg1:#0b1220;--bg2:#0f1830;--card:#111a2c;--line:#1a2748;--txt:#e7edff;--muted:#9db3dc;--acc:#2563eb;--ok:#22c55e;--bad:#ef4444}
+    *{box-sizing:border-box} body{margin:0;color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:radial-gradient(1200px 600px at 70% -10%,rgba(108,99,255,.2),transparent 60%),linear-gradient(180deg,var(--bg1),var(--bg2))}
+    header{position:sticky;top:0;z-index:30;backdrop-filter:blur(8px);background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.15));border-bottom:1px solid #12203f;padding:10px 14px;display:flex;align-items:center;gap:12px}
+    header img{width:32px;height:32px;border-radius:8px} header h1{font-size:18px;margin:0} .status-pill{margin-left:auto;padding:6px 10px;border:1px solid #203059;border-radius:999px;color:var(--muted)}
+    main{max-width:1100px;margin:18px auto;padding:0 16px 96px}
+    .hero{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#080f1e url('splash-1080x1920.png') center/cover no-repeat;min-height:340px;display:grid;place-items:center;text-align:center}
+    .hero h2{margin:14px 0 6px 0;font-size:34px} .hero p{margin:0;color:#c6d4ff}
+    .cta{margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .btn{background:#0f1d39;border:1px solid #223a7a;color:var(--txt);padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer}
+    .btn.primary{background:#112552;border-color:var(--acc)} .btn.ok{border-color:var(--ok)} .btn.bad{border-color:var(--bad)}
+    .grid{display:grid;gap:14px;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:14px}
+    .card{border:1px solid var(--line);background:var(--card);border-radius:14px;overflow:hidden}
+    .card img{display:block;width:100%;height:160px;object-fit:cover} .card .cap{padding:10px 12px;color:var(--muted);font-size:14px}
+    @media (max-width:1000px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}} @media (max-width:560px){.grid{grid-template-columns:1fr}}
+    .panel{margin-top:18px;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px}
+    .videoWrap{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#050a18;aspect-ratio:4/3}
+    video,canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover} canvas#overlay{pointer-events:none}
+    .hud{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .hud select,.hud input{background:#0f1d39;color:var(--txt);border:1px solid #223a7a;border-radius:10px;padding:8px 10px;font-weight:600}
+    .pill{padding:6px 10px;border-radius:999px;background:#0e1a33;border:1px solid #203059;color:#c2d3ff}
+    .muted{color:var(--muted);margin-top:8px}
+
+    /* Toast offline */
+    .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:9999;background:#0f1d39;border:1px solid #223a7a;color:#e7edff;padding:10px 14px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.35);display:none}
+    .tast.show{display:block;animation:fadein .2s ease}
+    @keyframes fadein{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+
+    .tabbar{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;justify-content:space-around;align-items:center;background:rgba(8,12,24,.85);backdrop-filter:blur(10px);border-top:1px solid #182542}
+    .tabbar a{color:#b8c9f2;font-weight:700} .tabbar a.active{color:#fff}
+  </style>
+  <!-- TFJS + Pose -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.20.0/dist/tf-core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.20.0/dist/tf-converter.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.20.0/dist/tf-backend-webgl.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
+</head>
+<body>
+  <header>
+    <img src="icon-192.png" alt="AI Trainer" />
+    <h1>AI Trainer</h1>
+    <span class="status-pill" id="status" aria-live="polite">Pronto…</span>
+  </header>
+
+  <main>
+    <section class="hero" aria-label="Capa AI Trainer">
+      <div>
+        <h2>Começa hoje a tua evolução</h2>
+        <p>Treinos guiados por IA • Correção de postura • Histórico e metas</p>
+        <div class="cta">
+          <a class="btn primary" href="#workout" aria-label="Ir para Treinar">▶️ Iniciar agora</a>
+          <a class="btn" href="#desafios" aria-label="Ver Desafios">🏁 Desafios</a>
+          <a class="btn" href="#progresso" aria-label="Ver Progresso">📈 Progresso</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid" id="home" aria-label="Atalhos principais">
+      <a class="card" href="#workout"><img src="cover-treinos.png" alt="Treinos com IA" /><div class="cap">Treinos com contagem e postura</div></a>
+      <a class="card" href="#alimentacao"><img src="cover-alimentacao.png" alt="Alimentação" /><div class="cap">Planos de alimentação (em breve)</div></a>
+      <a class="card" href="#desafios"><img src="cover-desafios.png" alt="Desafios" /><div class="cap">21 dias de evolução</div></a>
+      <a class="card" href="#progresso"><img src="cover-progresso.png" alt="Progresso" /><div class="cap">Histórico e metas</div></a>
+    </section>
+
+    <section class="panel" id="workout" aria-label="Treinar com IA">
+      <h3>Treinar com IA</h3>
+      <div class="videoWrap">
+        <video id="camera" playsinline muted aria-label="Câmara de treino"></video>
+        <canvas id="overlay" aria-hidden="true"></canvas>
+      </div>
+      <div class="hud">
+        <button id="btnStart" class="btn primary" aria-label="Iniciar treino">▶️ Iniciar</button>
+        <button id="btnStop" class="btn bad" aria-label="Parar treino">⏹️ Parar</button>
+        <button id="btnPhoto" class="btn" aria-label="Tirar foto">📸 Foto</button>
+        <button id="btnRecord" class="btn ok" aria-label="Gravar vídeo">● Gravar</button>
+        <button id="btnDownload" class="btn" aria-label="Guardar vídeo" disabled>⬇️ Guardar Vídeo</button>
+
+        <label for="exercise">Exercício:</label>
+        <select id="exercise" title="Exercício">
+          <option value="rightArm">Braço direito</option>
+          <option value="leftArm">Braço esquerdo</option>
+          <option value="squat">Agachamento</option>
+        </select>
+
+        <label for="goal">Meta:</label>
+        <input id="goal" type="number" min="1" step="1" value="10" style="width:90px" />
+
+        <span class="pill" aria-live="polite">Reps: <b id="reps">0</b></span>
+        <span class="pill">⏱ <b id="timer">00:00</b></span>
+      </div>
+      <p class="muted" id="tip">Dica: posiciona-te centrada/o com boa luz ✨</p>
+    </section>
+
+    <section class="panel history" id="progresso" aria-label="Histórico">
+      <h3>Histórico</h3>
+      <div class="row">
+        <button id="btnSave" class="btn" aria-label="Guardar sessão">💾 Guardar sessão</button>
+        <button id="btnHistory" class="btn" aria-label="Ver histórico">📜 Ver histórico</button>
+        <button id="btnClear" class="btn bad" aria-label="Apagar histórico">🗑️ Apagar histórico</button>
+        <button id="btnExport" class="btn ok" aria-label="Exportar CSV">📤 Exportar CSV</button>
+      </div>
+      <div id="historyTable"></div>
+    </section>
+
+    <div style="height:70px"></div>
+  </main>
+
+  <nav class="tabbar" aria-label="Menu inferior">
+    <a href="#home" class="active">🏠 Home</a>
+    <a href="#workout">💪 Treinos</a>
+    <a href="#alimentacao">🍽️ Alimentação</a>
+    <a href="#progresso">📈 Histórico</a>
+    <a href="#perfil">👤 Perfil</a>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="ia.js"></script>
+  <script>
+    // SW + toast mensagens
+    function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000); }
+    if("serviceWorker" in navigator){
+      navigator.serviceWorker.register("sw.js").then(()=>console.log("SW registado ✅"));
+      navigator.serviceWorker.addEventListener("message", evt=>{
+        if(evt.data && evt.data.type==="SW_READY") showToast("Disponível offline ✅");
+        if(evt.data && evt.data.type==="SW_UPDATE") showToast("Atualização instalada 🔄");
+      });
+    }
+    // Carrega painel DEV se ?dev
+    (function(){if(new URLSearchParams(location.search).has("dev")){var s=document.createElement("script");s.src="dev.js";document.body.appendChild(s);}})();
+  <!-- resto do HTML acima -->
+
+<script src="ia.js"></script>
+
+</body>  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.20.0/dist/tf-core.min.js"></>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.20.0/dist/tf-converter.>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.20.0/dist/tf-backen>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-de>
+</html>

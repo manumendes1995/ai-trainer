@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Trainer</title>
+  <meta name="theme-color" content="#0b1220" />
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="favicon.ico">
+  <style>
+    :root{
+      --bg:#0b1220; --panel:#0f1a33; --muted:#97a1c0;
+      --brand:#ffd54a; --accent:#5eead4; --danger:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(1200px 600px at 20% 20%,#122044 0%,#0b1220 50%,#0b1220 100%) fixed;color:#e7ecff;font-family:system-ui,Segoe UI,Arial}
+    header{display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid #182446;background:linear-gradient(#0c1630,#0b1220)}
+    header .dot{width:22px;height:22px;border-radius:6px;background:#111826;display:grid;place-items:center}
+    header .dot::after{content:"📸"}
+    header h1{margin:0;font-size:18px;letter-spacing:.3px}
+    header small{color:var(--muted);margin-left:8px}
+    .status{margin-left:auto;color:#8ce99a;font-weight:600}
+    main{max-width:1100px;margin:16px auto;padding:8px 12px}
+    nav.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    nav.tabs button{
+      background:#122043;border:1px solid #1a2b59;color:#cfe1ff;
+      padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600
+    }
+    nav.tabs button.active{outline:2px solid var(--accent);background:#11224b;color:#fff}
+    section.panel{display:none;background:var(--panel);border:1px solid #1a2750;border-radius:14px;padding:14px}
+    section.panel.active{display:block}
+    /* Treino */
+    .train-grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:900px){.train-grid{grid-template-columns:2fr 1fr}}
+    .cam-wrap{position:relative;aspect-ratio:4/3;background:#091224;border:1px solid #1a2a55;border-radius:16px;overflow:hidden}
+    video,canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    canvas{pointer-events:none}
+    .overlay-box{position:absolute;inset:12px;border:2px dashed rgba(255,255,255,.08);border-radius:14px}
+    .controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .btn{padding:10px 12px;border-radius:10px;border:1px solid #213267;background:#0e1a36;color:#e9f1ff;font-weight:700;cursor:pointer}
+    .btn.primary{background:#142a60;border-color:#1e3b83}
+    .btn.warn{background:#3a0c17;border-color:#611727}
+    .btn.good{background:#08381e;border-color:#0b5b33}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .hud{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px;color:#c9d7ff}
+    .pill{background:#0f1b36;border:1px solid #1b2b59;padding:8px 10px;border-radius:999px}
+    .select,.input{background:#0e1a36;border:1px solid #213267;border-radius:8px;color:#e9f1ff;padding:8px}
+    .tip{margin-top:8px;color:#9cc2ff}
+    /* Cartões laterais */
+    .card{background:#0f1b36;border:1px solid #1a2b59;border-radius:12px;padding:12px}
+    .card h3{margin:.2rem 0 .6rem;font-size:15px;color:#dfe8ff}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid #1b2b59;padding:8px 6px;text-align:left;color:#cfe1ff}
+    .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#16264f;border:1px solid #25408a;color:#a8c8ff;font-weight:700}
+    footer{padding:18px;color:#92a6d9;text-align:center}
+  </style>
+</head>
+<body>
+<header>
+  <div class="dot"></div>
+  <h1>AI Trainer</h1>
+  <small id="swState"></small>
+  <div class="status" id="appStatus">Pronto…</div>
+</header>
+
+<main>
+  <nav class="tabs">
+    <button data-tab="treino" class="active">Treino</button>
+    <button data-tab="alimentacao">Alimentação</button>
+    <button data-tab="progresso">Progresso</button>
+    <button data-tab="comunidade">Comunidade</button>
+  </nav>
+
+  <!-- TREINO -->
+  <section id="treino" class="panel active">
+    <div class="train-grid">
+      <div>
+        <div class="cam-wrap">
+          <video id="camera" playsinline autoplay muted></video>
+          <canvas id="overlay"></canvas>
+          <div class="overlay-box"></div>
+        </div>
+
+        <div class="controls">
+          <button class="btn primary" id="btnStart">Iniciar</button>
+          <button class="btn warn" id="btnStop" disabled>Parar</button>
+          <button class="btn" id="btnPhoto" disabled>📷 Foto</button>
+          <button class="btn" id="btnRecord" disabled>● Gravar</button>
+          <button class="btn" id="btnDownload" disabled>💾 Guardar Vídeo</button>
+        </div>
+
+        <div class="hud">
+          <span class="pill">Modo:
+            <select id="exercise" class="select">
+              <option value="brasodir">Braço direito</option>
+              <option value="bracoesq">Braço esquerdo</option>
+              <option value="agacha">Agachamento</option>
+            </select>
+          </span>
+          <span class="pill">Meta: <input id="goal" class="input" type="number" min="1" value="10" style="width:70px"></span>
+          <span class="pill">Reps: <b id="reps">0</b></span>
+          <span class="pill">⏱ <b id="timer">00:00</b></span>
+        </div>
+        <div class="tip" id="tip">Dica: mantenha-se centrada/o e com boa luz ✨</div>
+      </div>
+
+      <div class="card">
+        <h3>Histórico da sessão</h3>
+        <div class="controls" style="margin-bottom:8px">
+          <button class="btn good" id="btnSave" disabled>Guardar Sessão</button>
+          <button class="btn" id="btnHistory">Ver Histórico</button>
+          <button class="btn warn" id="btnClear">Apagar Histórico</button>
+          <button class="btn" id="btnExport">Exportar CSV</button>
+        </div>
+        <div id="historyTable"><span class="badge">Sem registos</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALIMENTAÇÃO -->
+  <section id="alimentacao" class="panel">
+    <div class="grid3">
+      <div class="card">
+        <h3>Plano — Emagrecimento</h3>
+        <p>Proteínas magras, vegetais, hidratos integrais. Água: 2L/dia.</p>
+      </div>
+      <div class="card">
+        <h3>Plano — Hipertrofia</h3>
+        <p>+300 kcal, 1.8–2.2g proteína/kg, 4–6 refeições/dia.</p>
+      </div>
+      <div class="card">
+        <h3>Diário Alimentar</h3>
+        <p>Em breve: registo de refeições e contagem calórica.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRESSO -->
+  <section id="progresso" class="panel">
+    <div class="card">
+      <h3>Resumo</h3>
+      <p>Quando guardares sessões, elas aparecem aqui e no histórico. Gráficos vêm a seguir 🎯</p>
+    </div>
+  </section>
+
+  <!-- COMUNIDADE -->
+  <section id="comunidade" class="panel">
+    <div class="grid3">
+      <div class="card">
+        <h3>Desafio 21 Dias</h3>
+        <p>Treina 10–20 min/dia. Marca as sessões e acompanha a evolução.</p>
+      </div>
+      <div class="card"><h3>Mural</h3><p>Em breve: partilha de fotos e progresso.</p></div>
+      <div class="card"><h3>Leaderboard</h3><p>Top de consistência (dias seguidos).</p></div>
+    </div>
+  </section>
+</main>
+
+<footer>© AI Trainer — PWA • Offline Ready</footer>
+
+<script src="script.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").then(r=>{
+      document.getElementById("swState").textContent = "SW ok";
+      console.log("SW registado ✅");
+    }).catch(console.error);
+  }
+</script>
+</body>
+</html>

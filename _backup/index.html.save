@@ -1,0 +1,21 @@
+!DOCTYPE html>
+
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello Camera</title>
+</head> <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello Camera</title>
+  <link rel="manifest" href="manifest.json">   <!-- 👈 ESTA LINHA -->
+</head>
+<body>
+  <h1>Hello Camera 📸</h1>
+  <button onclick="openCamera()">Abrir Câmera</button>
+  <video id="camera" autoplay playsinline></video>
+
+  <script src="script.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {

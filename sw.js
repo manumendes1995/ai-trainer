@@ -1,46 +1,32 @@
-const CACHE = "ai-trainer-v7";
+const CACHE = "ai-trainer-v4";
 const ASSETS = [
   "/",
   "/index.html",
-  "/ai-deploy.html",
   "/ia.js",
   "/manifest.json",
-  "/icon-192.png",
-  "/icon-512.png",
   "/favicon.ico"
 ];
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
+self.addEventListener("install", (e)=>{
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));
   self.skipWaiting();
-  console.log("SW: instalado ✅");
 });
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+self.addEventListener("activate", (e)=>{
+  e.waitUntil(
+    caches.keys().then(keys=>Promise.all(keys.map(k=>k!==CACHE && caches.delete(k))))
   );
   self.clients.claim();
-  console.log("SW: ativo ✅");
 });
 
-self.addEventListener("fetch", (event) => {
-  const req = event.request;
-  event.respondWith(
-    caches.match(req).then((cacheResp) =>
-      cacheResp ||
-      fetch(req).then((netResp) => {
-        const copy = netResp.clone();
-        caches.open(CACHE).then((c) => c.put(req, copy));
-        return netResp;
-      }).catch(() => cacheFallback(req))
-    )
+// network-first com fallback ao cache
+self.addEventListener("fetch", (e)=>{
+  const req = e.request;
+  e.respondWith(
+    fetch(req).then(res=>{
+      const copy = res.clone();
+      caches.open(CACHE).then(c=>c.put(req, copy));
+      return res;
+    }).catch(()=>caches.match(req).then(cached=> cached || caches.match("/index.html")))
   );
 });
-
-function cacheFallback(req){
-  if (req.mode === "navigate") return caches.match("/ai-deploy.html");
-  return new Response("", { status: 404 });
-}

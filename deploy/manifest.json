@@ -1,7 +1,7 @@
 {
   "name": "AI Trainer",
   "short_name": "AI Trainer",
-  "start_url": "/ai-deploy.html",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0b1220",

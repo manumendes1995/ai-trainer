@@ -1,109 +1,239 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>AI Trainer</title>
-
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="favicon.ico" sizes="any" />
   <meta name="theme-color" content="#0b1220" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="favicon.ico">
   <style>
-    :root { --bg:#0b1220; --card:#121a2a; --txt:#e6eefc; --muted:#9bb0d6; --acc:#2563eb; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; color: var(--txt); background: linear-gradient(180deg,#0b1220 0%, #0f1830 100%); }
-    header { padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #152040; background: rgba(0,0,0,.2); position: sticky; top:0; backdrop-filter: blur(6px); z-index: 10; }
-    header img { width: 32px; height: 32px; border-radius: 8px; }
-    header h1 { font-size: 18px; margin: 0; letter-spacing: .3px; }
-    main { max-width: 960px; margin: 16px auto; padding: 0 16px 32px; }
-    .grid { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
-    .card { background: var(--card); border: 1px solid #1a2748; border-radius: 12px; padding: 12px; }
-    .videoWrap { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 4/3; background:#050a18; border:1px solid #1a2748; }
-    video, canvas { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-    canvas#overlay { pointer-events:none; }
-    .hud { display:flex; flex-wrap: wrap; gap:8px; margin-top: 12px; }
-    .hud button, .hud select, .hud input { background:#0e1a33; color:var(--txt); border:1px solid #203059; border-radius:8px; padding:8px 12px; font-weight:600; }
-    .hud button:hover { border-color: var(--acc); }
-    .hud .ok { border-color: var(--ok); }
-    .hud .danger { border-color: var(--bad); }
-    .hud .primary { background: #112552; border-color: var(--acc); }
-    .row { display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap; }
-    .pill { padding:6px 10px; border-radius:999px; background:#0e1a33; border:1px solid #203059; color:var(--muted); }
-    .stat { font-weight:700; color: var(--txt); }
-    .tip { margin-top: 10px; color: var(--muted); font-size: 14px; min-height: 20px; }
-    .history table { width:100%; border-collapse: collapse; }
-    .history th, .history td { border-bottom: 1px solid #1a2748; padding: 8px; text-align: left; font-size: 14px; }
-    .history th { color:#b9c9ef; font-weight:700; }
-    footer { text-align:center; color:var(--muted); font-size:12px; margin-top:16px; }
-    @media (max-width: 880px){ .grid{ grid-template-columns: 1fr; } }
+    :root{
+      --bg:#0b1220; --panel:#0f1a33; --muted:#a3b3d8;
+      --brand:#ffd54a; --accent:#5eead4; --danger:#ff6b6b; --ok:#67e480;
+      --stroke:#1a2c59;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;color:#eaf1ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial}
+    body{
+      background:
+        radial-gradient(1200px 600px at 15% 20%, #122044 0%, rgba(11,18,32,0) 60%),
+        radial-gradient(1000px 700px at 85% 10%, #1b2d5a 0%, rgba(11,18,32,0) 50%),
+        linear-gradient(#0b1220,#0b1220);
+    }
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    header{position:sticky;top:0;z-index:30;background:rgba(11,18,32,.85);backdrop-filter:blur(8px);border-bottom:1px solid #152445}
+    .brand{display:flex;gap:10px;align-items:center;font-weight:800;letter-spacing:.4px}
+    .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#ffd54a,#ff8f6b);}
+    nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    nav a{padding:8px 12px;border-radius:10px;background:#0f1a33;color:#cfe1ff;border:1px solid #152a56}
+    nav a.active{background:linear-gradient(135deg,#ffd54a,#ff8f6b);color:#0b1220;border-color:transparent;font-weight:800}
+    .grid{display:grid;gap:16px}
+    @media(min-width:900px){ .grid{grid-template-columns:1.1fr .9fr} }
+    h1{margin:.2rem 0;font-size:clamp(1.6rem,2.6vw,2.4rem)}
+    h2{margin:1rem 0 .5rem;font-size:clamp(1.3rem,2.2vw,1.8rem)}
+    p{margin:.5rem 0;color:#cdd7f1}
+    .kicker{color:#9bc2ff;text-transform:uppercase;font-weight:700;letter-spacing:.12em;font-size:.82rem}
+    .panel{background:rgba(13,22,44,.65);border:1px solid #1a2c59;border-radius:16px;padding:16px}
+    .cards{display:grid;gap:14px}
+    @media(min-width:900px){ .cards{grid-template-columns:repeat(2,1fr)} }
+    .card{border:1px solid #1a2c59;border-radius:16px;background:rgba(14,24,48,.6);padding:16px}
+    .tag{display:inline-block;font-size:.78rem;padding:4px 10px;border-radius:999px;background:#13244a;border:1px solid #1a2c59;margin-bottom:8px}
+    .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .btn{padding:12px 14px;border-radius:12px;border:1px solid #1a2c59;background:#0f1a33;color:#eaf1ff;cursor:pointer}
+    .btn.primary{background:linear-gradient(135deg,#ffd54a,#ff8f6b);color:#0b1220;border-color:transparent;font-weight:800}
+    .btn.ok{background:#0f1a33;border-color:#2b5e46;color:#67e480}
+    .btn.ghost{background:transparent}
+    .muted{color:#a3b3d8}
+    footer{padding:40px;color:#8ca5d6;text-align:center}
+    /* Câmara */
+    .cam-wrap{display:grid;gap:12px}
+    @media(min-width:1000px){ .cam-wrap{grid-template-columns:1.1fr .9fr} }
+    video,canvas{width:100%;max-width:720px;aspect-ratio:4/3;border-radius:16px;border:1px solid #1a2c59;background:#061024}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .pill{padding:6px 10px;border-radius:999px;border:1px solid #1a2c59;background:rgba(13,22,44,.65)}
+    .hidden{display:none}
   </style>
-
-  <!-- TensorFlow.js + Pose Detection (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.20.0/dist/tf-core.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.20.0/dist/tf-converter.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.20.0/dist/tf-backend-webgl.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
 </head>
 <body>
   <header>
-    <img src="icon-192.png" alt="AI Trainer" />
-    <h1>AI Trainer</h1>
-    <span class="pill" id="status">Pronto…</span>
+    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>AI Trainer</div>
+      </div>
+      <nav id="nav">
+        <a href="#home" data-tab="home" class="active">Início</a>
+        <a href="#camera" data-tab="camera">Câmara</a>
+        <a href="#treinos" data-tab="treinos">Treinos</a>
+        <a href="#alimentacao" data-tab="alimentacao">Alimentação</a>
+      </nav>
+    </div>
   </header>
 
-  <main>
-    <div class="grid">
-      <section class="card">
-        <div class="videoWrap">
-          <video id="camera" playsinline muted></video>
-          <canvas id="overlay"></canvas>
+  <main class="wrap">
+    <!-- HOME -->
+    <section id="home" class="panel">
+      <div class="grid">
+        <div>
+          <div class="kicker">Bem-vinda(o)</div>
+          <h1>O teu coach de bolso com IA</h1>
+          <p>Conta repetições, dá dicas de postura, sugere treinos e cardápios — e funciona offline.</p>
+          <div class="cta">
+            <a class="btn primary" href="#camera" data-tab="camera">Abrir Câmara</a>
+            <a class="btn ghost" href="#treinos" data-tab="treinos">Gerar Treino</a>
+          </div>
+          <p class="muted">Sem anúncios. PWA — instala no teu telemóvel em “Adicionar ao ecrã inicial”.</p>
         </div>
+        <div class="cards">
+          <div class="card">
+            <div class="tag">Correção de postura</div>
+            <h3>Feedback em tempo real</h3>
+            <p>Indicadores simples como “Desce mais / Sobe o cotovelo / Mantém o tronco direito”.</p>
+          </div>
+          <div class="card">
+            <div class="tag">Planos</div>
+            <h3>Treinos e refeições</h3>
+            <p>Planos personalizados por objetivo, sexo e nível; cardápios omni/vege/low-carb.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <div class="hud">
-          <button id="btnStart" class="primary">▶️ Iniciar</button>
-          <button id="btnStop" class="danger">⏹️ Parar</button>
-          <button id="btnPhoto">📸 Foto</button>
-          <button id="btnRecord" class="ok">● Gravar</button>
-          <button id="btnDownload" disabled>⬇️ Guardar Vídeo</button>
+    <!-- CÂMARA -->
+    <section id="camera" class="panel hidden">
+      <h2>Câmara</h2>
+      <div class="cam-wrap">
+        <div>
+          <video id="cameraVideo" playsinline autoplay muted></video>
+          <canvas id="overlay" class="hidden"></canvas>
+          <div class="toolbar" style="margin-top:10px">
+            <button class="btn" id="btnStart">Iniciar</button>
+            <button class="btn" id="btnStop">Parar</button>
+            <button class="btn" id="btnPhoto">Foto</button>
+            <button class="btn" id="btnRecord">Gravar</button>
+            <button class="btn ok" id="btnDownload" disabled>Guardar vídeo</button>
+            <span class="pill" id="status">Pronto…</span>
+            <span class="pill">Reps: <b id="reps">0</b></span>
+            <span class="pill">Meta: <b id="goal">10</b></span>
+            <span class="pill" id="timer">00:00</span>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="tag">Modo</div>
+            <select id="exercise" class="btn" style="width:100%">
+              <option value="right_arm">Braço direito</option>
+              <option value="left_arm">Braço esquerdo</option>
+              <option value="squat">Agachamento</option>
+              <option value="auto">Auto (reconhecimento básico)</option>
+            </select>
+          </div>
+          <div class="card">
+            <div class="tag">Dicas</div>
+            <p id="tip" class="muted">Levanta e baixa o braço até à altura do ombro.</p>
+          </div>
+          <div class="card">
+            <div class="tag">Histórico (este dispositivo)</div>
+            <div id="historyTable" class="muted">Sem registos ainda.</div>
+            <div class="cta" style="margin-top:12px">
+              <button class="btn" id="btnSave">Guardar sessão</button>
+              <button class="btn ghost" id="btnHistory">Ver histórico</button>
+              <button class="btn ghost" id="btnClear">Apagar histórico</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-          <select id="exercise">
-            <option value="rightArm">Braço direito</option>
-            <option value="leftArm">Braço esquerdo</option>
-            <option value="squat">Agachamento</option>
+    <!-- TREINOS -->
+    <section id="treinos" class="panel hidden">
+      <h2>Treinos personalizados</h2>
+      <div class="cards">
+        <div class="card">
+          <div class="tag">Preferências</div>
+          <label class="muted">Sexo</label>
+          <select id="sexo" class="btn" style="width:100%">
+            <option value="f">Feminino</option>
+            <option value="m">Masculino</option>
           </select>
-
-          <label>Meta:
-            <input id="goal" type="number" min="1" step="1" value="10" style="width:80px" />
-          </label>
-
-          <span class="pill">Reps: <span class="stat" id="reps">0</span></span>
-          <span class="pill">⏱ <span class="stat" id="timer">00:00</span></span>
+          <label class="muted" style="margin-top:8px">Objetivo</label>
+          <select id="objetivo" class="btn" style="width:100%">
+            <option value="perda">Perder gordura</option>
+            <option value="ganho">Ganhar massa</option>
+            <option value="manter">Manter</option>
+          </select>
+          <label class="muted" style="margin-top:8px">Nível</label>
+          <select id="nivel" class="btn" style="width:100%">
+            <option value="iniciante">Iniciante</option>
+            <option value="intermedio">Intermédio</option>
+            <option value="avancado">Avançado</option>
+          </select>
+          <label class="muted" style="margin-top:8px">Dias/semana</label>
+          <input id="dias" class="btn" type="number" min="2" max="6" value="4" style="width:100%" />
+          <div class="cta">
+            <button class="btn primary" id="btnGerarTreino">Gerar plano</button>
+            <button class="btn ghost" id="btnCopiarTreino">Copiar</button>
+          </div>
         </div>
-
-        <div class="tip" id="tip">Dica: mantenha-se centrada/o e com boa luz ✨</div>
-      </section>
-
-      <aside class="card history">
-        <div class="row">
-          <button id="btnSave">💾 Guardar</button>
-          <button id="btnHistory">📜 Histórico</button>
-          <button id="btnClear" class="danger">🗑️ Apagar Histórico</button>
-          <button id="btnExport">📤 Exportar CSV</button>
+        <div class="card">
+          <div class="tag">Plano</div>
+          <pre id="treinoOut" style="white-space:pre-wrap;margin:0"></pre>
         </div>
-        <div id="historyTable" style="margin-top:10px;"></div>
-      </aside>
-    </div>
+      </div>
+    </section>
 
-    <footer>Funciona offline. Instala no telemóvel pelo menu “Adicionar ao ecrã inicial”.</footer>
+    <!-- ALIMENTAÇÃO -->
+    <section id="alimentacao" class="panel hidden">
+      <h2>Alimentação</h2>
+      <div class="cards">
+        <div class="card">
+          <div class="tag">Preferências</div>
+          <label class="muted">Tipo</label>
+          <select id="pref" class="btn" style="width:100%">
+            <option value="omni">Omnívoro</option>
+            <option value="vege">Vegetariano</option>
+            <option value="lowcarb">Low-carb</option>
+          </select>
+          <label class="muted" style="margin-top:8px">Calorias/dia</label>
+          <input id="kcal" class="btn" type="number" min="1200" max="3500" step="50" value="2000" style="width:100%" />
+          <div class="cta">
+            <button class="btn primary" id="btnGerarAlim">Gerar cardápio</button>
+            <button class="btn ghost" id="btnCopiarAlim">Copiar</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tag">Cardápio</div>
+          <pre id="alimOut" style="white-space:pre-wrap;margin:0"></pre>
+        </div>
+      </div>
+    </section>
   </main>
 
+  <footer>© AI Trainer — PWA • Offline Ready</footer>
+
+  <!-- script principal da app -->
   <script src="ia.js"></script>
+
   <script>
-    if ("serviceWorker" in navigator) {
+    // navegação por abas
+    const tabs = ["home","camera","treinos","alimentacao"];
+    function showTab(t){
+      tabs.forEach(id=>{
+        document.getElementById(id).classList.toggle("hidden", id!==t);
+        document.querySelector('nav a[data-tab="'+id+'"]').classList.toggle("active", id===t);
+      });
+      history.replaceState(null,"","#"+t);
+    }
+    document.querySelectorAll("nav a[data-tab]").forEach(a=>{
+      a.addEventListener("click", (e)=>{ e.preventDefault(); showTab(a.dataset.tab); });
+    });
+    const initial = tabs.includes(location.hash.replace("#","")) ? location.hash.replace("#","") : "home";
+    showTab(initial);
+
+    // registar service worker
+    if("serviceWorker" in navigator){
       navigator.serviceWorker.register("sw.js").then(()=>console.log("SW registado ✅"));
     }
   </script>
