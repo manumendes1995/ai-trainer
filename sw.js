@@ -1,32 +1,26 @@
-const CACHE = "ai-trainer-v4";
-const ASSETS = [
-  "/",
-  "/index.html",
-  "/ia.js",
-  "/manifest.json",
-  "/favicon.ico"
-];
-
-self.addEventListener("install", (e)=>{
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));
+self.addEventListener("install", (e) => {
+  console.log("SW: instalado ✅");
   self.skipWaiting();
 });
 
-self.addEventListener("activate", (e)=>{
-  e.waitUntil(
-    caches.keys().then(keys=>Promise.all(keys.map(k=>k!==CACHE && caches.delete(k))))
-  );
-  self.clients.claim();
+self.addEventListener("activate", (e) => {
+  console.log("SW: ativo ✅");
+  e.waitUntil(clients.claim());
 });
 
-// network-first com fallback ao cache
-self.addEventListener("fetch", (e)=>{
-  const req = e.request;
+self.addEventListener("fetch", (e) => {
   e.respondWith(
-    fetch(req).then(res=>{
-      const copy = res.clone();
-      caches.open(CACHE).then(c=>c.put(req, copy));
-      return res;
-    }).catch(()=>caches.match(req).then(cached=> cached || caches.match("/index.html")))
+    caches.match(e.request).then((resp) => {
+      return (
+        resp ||
+        fetch(e.request).then((response) => {
+          const copy = response.clone();
+          caches.open("ai-trainer-v1").then((cache) => {
+            cache.put(e.request, copy);
+          });
+          return response;
+        })
+      );
+    })
   );
 });
