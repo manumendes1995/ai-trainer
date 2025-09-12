@@ -5,25 +5,17 @@
 [functions]
   node_bundler = "esbuild"
 
+# Cabeçalhos para PWA + permissões + CSP simples
 [[headers]]
   for = "/*"
   [headers.values]
-    # CSP: permite nossa app, JSDelivr (TensorFlow), Netlify Identity e Stripe (se usares no futuro)
-    Content-Security-Policy = """
-      default-src 'self';
-      img-src 'self' data: blob:;
-      media-src 'self' blob:;
-      style-src 'self' 'unsafe-inline';
-      script-src 'self' https://cdn.jsdelivr.net https://identity.netlify.com;
-      connect-src 'self' https://identity.netlify.com https://api.netlify.com;
-      frame-src https://identity.netlify.com;
-    """
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self'; frame-ancestors 'self';"
     Permissions-Policy = "camera=*, microphone=*, geolocation=*"
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "SAMEORIGIN"
 
-# SPA fallback
+# SPA: envia tudo para index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
