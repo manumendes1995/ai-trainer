@@ -1,101 +1,79 @@
-// Service Worker — AI Trainer
-const CACHE = "ai-trainer-v1";
-
-// Lista de ficheiros essenciais para funcionar offline
-const ASSETS = [
-  "/",            // raiz (o Netlify reescreve para /index.html)
+// SW para AI Trainer — rede-primeiro nos HTML/JS, cache de apoio para offline
+const SW_VERSION = "ai-trainer-v9";
+const CORE = [
+  "/",                 // Netlify: raiz
   "/index.html",
   "/manifest.json",
-  "/ia.js",
   "/favicon.ico",
   "/icon-192.png",
-  "/icon-512.png"
+  "/icon-512.png",
+  "/planos/planos.js"
 ];
 
-// Instalação: pré-cache dos assets
+// GitHub Pages costuma servir sob /ai-trainer/.
+// Se estiveres a usar GitHub Pages, descomenta a linha abaixo e comenta as de cima:
+// const ROOT = "/ai-trainer/";
+// const CORE = [`${ROOT}`, `${ROOT}index.html`, `${ROOT}manifest.json`, `${ROOT}favicon.ico`, `${ROOT}icon-192.png`, `${ROOT}icon-512.png`, `${ROOT}planos/planos.js`];
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS))
+    caches.open(SW_VERSION).then((c) => c.addAll(CORE)).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
-  console.log("SW: instalado ✅");
+  // console.log("SW: instalado");
 });
 
-// Ativação: limpar caches antigos e assumir controlo
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    (async () => {
-      const keys = await caches.keys();
-      await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)));
+    caches.keys().then(async (keys) => {
+      await Promise.all(keys.filter(k => k !== SW_VERSION).map(k => caches.delete(k)));
       await self.clients.claim();
-      console.log("SW: ativo ✅");
-    })()
+    })
   );
+  // console.log("SW: ativo");
 });
 
-// Estratégias de cache:
-// - Navegação (HTML): network-first com fallback cache/offline
-// - Assets estáticos listados em ASSETS: cache-first com fallback rede
 self.addEventListener("fetch", (event) => {
   const req = event.request;
 
-  // Pedidos de navegação (ex.: entrar direto em /#camara)
-  if (req.mode === "navigate") {
-    event.respondWith(networkFirst(req));
+  // Só GET é elegível a cache
+  if (req.method !== "GET") return;
+
+  // Estratégia: rede-primeiro para HTML/JS; cache-primeiro para ícones/manif.
+  const accept = req.headers.get("accept") || "";
+  const isHTML = accept.includes("text/html");
+  const isJS = req.destination === "script" || req.url.endsWith(".js");
+  const isAsset = req.destination === "image" || req.url.endsWith(".png") || req.url.endsWith(".ico") || req.url.endsWith("manifest.json");
+
+  if (isHTML || isJS) {
+    event.respondWith(
+      fetch(req)
+        .then((resp) => {
+          const clone = resp.clone();
+          caches.open(SW_VERSION).then((c) => c.put(req, clone));
+          return resp;
+        })
+        .catch(async () => {
+          const cached = await caches.match(req);
+          if (cached) return cached;
+          // fallback para a homepage se estiver offline e sem cache daquele HTML
+          return caches.match("/index.html");
+        })
+    );
     return;
   }
 
-  // Assets conhecidos -> cache-first
-  const url = new URL(req.url);
-  const isAsset = ASSETS.includes(url.pathname);
   if (isAsset) {
-    event.respondWith(cacheFirst(req));
-    return;
+    event.respondWith(
+      caches.match(req).then((cached) => {
+        return (
+          cached ||
+          fetch(req).then((resp) => {
+            const clone = resp.clone();
+            caches.open(SW_VERSION).then((c) => c.put(req, clone));
+            return resp;
+          })
+        );
+      })
+    );
   }
-
-  // Outros pedidos: tenta rede com fallback cache
-  event.respondWith(networkWithCacheFallback(req));
-});
-
-// Helpers ############################
-
-async function cacheFirst(req) {
-  const cached = await caches.match(req);
-  if (cached) return cached;
-  const res = await fetch(req);
-  const cache = await caches.open(CACHE);
-  cache.put(req, res.clone());
-  return res;
-}
-
-async function networkFirst(req) {
-  try {
-    const res = await fetch(req);
-    const cache = await caches.open(CACHE);
-    cache.put(req, res.clone());
-    return res;
-  } catch (e) {
-    const cached = await caches.match(req);
-    if (cached) return cached;
-    // Fallback mínimo: se pedir navegação e não houver cache, devolve index
-    return caches.match("/index.html");
-  }
-}
-
-async function networkWithCacheFallback(req) {
-  try {
-    const res = await fetch(req);
-    const cache = await caches.open(CACHE);
-    cache.put(req, res.clone());
-    return res;
-  } catch (e) {
-    const cached = await caches.match(req);
-    if (cached) return cached;
-    throw e;
-  }
-}
-
-// Mensagem opcional para forçar update imediato
-self.addEventListener("message", (event) => {
-  if (event.data === "SKIP_WAITING") self.skipWaiting();
 });
