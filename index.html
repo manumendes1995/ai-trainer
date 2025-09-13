@@ -5,188 +5,204 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>AI Trainer</title>
   <meta name="theme-color" content="#0e1325" />
-  <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="favicon.ico" />
   <style>
     :root{
-      --bg:#0e1325; --panel:#121a35; --muted:#a9b7dd;
+      --bg:#0e1325; --panel:#111b36; --muted:#a9b7dd;
       --brand:#7c4dff; --accent:#58e1c1; --danger:#ff6b6b; --ok:#67e480;
-      --stroke:#1b2858;
+      --ink:#eaf1ff; --line:#1b2858;
     }
     *{box-sizing:border-box}
     html,body{margin:0;height:100%}
-    body{
-      color:#eaf1ff;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;
+    body{color:var(--ink); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;
       background:
-        radial-gradient(1200px 600px at 15% 20%, #122044 0%, rgba(14,19,37,0) 60%),
-        radial-gradient(1000px 700px at 85% 10%, #1b2d5a 0%, rgba(14,19,37,0) 50%),
-        #0e1325;
+        radial-gradient(1100px 650px at 15% 15%, #192654 0%, rgba(14,19,37,0) 55%),
+        radial-gradient(900px 600px at 85% 0%, #0f1a3a 0%, rgba(14,19,37,0) 40%),
+        linear-gradient(#0e1325,#0e1325);
     }
     a{color:inherit;text-decoration:none}
+    header{position:sticky;top:0;z-index:10;background:rgba(14,19,37,.85);backdrop-filter:blur(8px); border-bottom:1px solid var(--line)}
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
-
-    header{position:sticky;top:0;z-index:30;background:rgba(14,19,37,.85);backdrop-filter:blur(8px);border-bottom:1px solid #18244a}
-    .brand{display:flex;gap:10px;align-items:center;font-weight:800;letter-spacing:.4px}
-    .brand .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#7c4dff,#58e1c1)}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.3px}
+    .logo{width:28px;height:28px;border-radius:8px;background:conic-gradient(from 30deg,var(--brand),#ff8f6b,var(--accent)); box-shadow:0 0 0 2px #0005 inset}
     nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    nav a{padding:10px 12px;border-radius:10px;background:#121a35;color:#cfe1ff;border:1px solid #1b2858}
-    nav a.active{background:linear-gradient(135deg,#7c4dff,#58e1c1);color:#0e1325;font-weight:700;border-color:transparent}
-
+    nav a{padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#0f1a33;color:#cfe1ff}
+    nav a.active{background:linear-gradient(135deg,var(--brand),#ff8f6b); color:#111}
     .grid{display:grid;gap:16px}
-    @media(min-width:900px){ .grid{grid-template-columns:1.2fr .8fr} }
-
-    h1{margin:.2rem 0 0;font-size:clamp(1.6rem,2.6vw,2.2rem)}
-    h2{margin:1rem 0 .5rem;font-size:clamp(1.3rem,2.2vw,1.8rem)}
-    h3{margin:.6rem 0 .4rem}
-    p{margin:.5rem 0;color:#cdd7f1}
-
-    .hero{margin-top:18px;padding:18px;border:1px solid #1b2858;border-radius:16px;background:linear-gradient(180deg,#121a35 0%,#0e1325 100%)}
-    .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .btn{padding:12px 14px;border-radius:12px;border:1px solid #1b2858;background:#151f40;color:#fff;cursor:pointer}
-    .btn.primary{background:linear-gradient(135deg,#7c4dff,#58e1c1);color:#0e1325;border-color:transparent;font-weight:800}
+    @media(min-width:900px){ .grid{grid-template-columns:1.1fr .9fr} }
+    h1{font-size:clamp(1.6rem,2.6vw,2.4rem);margin:.2rem 0}
+    h2{font-size:clamp(1.2rem,2vw,1.6rem);margin:.8rem 0}
+    p{color:#cdd7f1}
+    .hero{padding:28px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#0f1a33,#0d1730)}
+    .cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .btn{padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0f1a33;color:#fff;cursor:pointer}
+    .btn.primary{background:linear-gradient(135deg,var(--brand),#ff8f6b);color:#111;border:none}
+    .btn.ok{background:linear-gradient(135deg,var(--ok),#b5ffcf);color:#06240f;border:none}
     .btn.ghost{background:transparent}
-
-    .panel{border:1px solid #1b2858;border-radius:16px;background:#111a3a;padding:16px}
+    .card{border:1px solid var(--line);border-radius:16px;background:#0f1a33;padding:16px}
+    .field{display:grid;gap:6px;margin:10px 0}
+    .field input,.field select,.pill{padding:10px;border-radius:10px;border:1px solid var(--line);background:#0f1a33;color:#fff}
+    .pill{display:inline-block}
     .cards{display:grid;gap:14px}
-    @media(min-width:900px){ .cards{grid-template-columns:repeat(2,1fr)} }
-    .card{border:1px solid #1b2858;border-radius:16px;background:#101836;padding:16px}
-    .note{color:#a9b7dd;font-size:.92rem}
+    @media(min-width:900px){ .cards{grid-template-columns:1fr 1fr} }
+    .muted{color:var(--muted)}
+    footer{padding:40px;text-align:center;color:#8ca5d6}
 
-    /* Cartaz */
-    .form{display:grid;gap:14px}
-    .row{display:grid;gap:10px}
-    @media(min-width:700px){ .row{grid-template-columns:1fr 1fr 1fr} }
-    label{font-weight:700}
-    select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #243165;background:#0f1736;color:#eaf1ff}
-    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-    .chip{padding:8px 10px;border-radius:999px;border:1px solid #243165;background:#0f1736;color:#cfe1ff;cursor:pointer}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-    .hidden{display:none}
-    .tbl{width:100%;border-collapse:collapse;margin-top:8px}
-    .tbl th,.tbl td{border:1px solid #223067;padding:8px;border-radius:8px}
-    .tbl th{background:#0f1736;color:#a9b7dd;text-align:left}
-    .tbl td{background:#0f1533}
-
-    footer{padding:40px;color:#8ca5d6;text-align:center}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #243165;background:#0f1736}
-    .ok{color:#67e480}
+    /* Câmara */
+    .cam-wrap{display:grid;gap:12px}
+    @media(min-width:1000px){ .cam-wrap{grid-template-columns:1.2fr .8fr} }
+    video,canvas{width:100%;max-height:65vh;border-radius:16px;border:1px solid var(--line);background:#000}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .hidden{display:none!important}
+    .kpi{display:flex;gap:12px;flex-wrap:wrap}
+    .kpi .pill{border-color:#25407f}
   </style>
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>AI Trainer</div>
+<header>
+  <div class="wrap">
+    <div class="brand"><div class="logo"></div> AI Trainer</div>
+    <nav id="nav">
+      <a href="#home" data-tab="home" class="active">Início</a>
+      <a href="#treinos" data-tab="treinos">Treinos</a>
+      <a href="#alim" data-tab="alim">Alimentação</a>
+      <a href="#camera" data-tab="camera">Motion Coach</a>
+      <a href="#conta" data-tab="conta">Conta</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- HOME -->
+  <section id="home" class="grid">
+    <div class="hero">
+      <h1>Treina melhor com IA — plano, nutrição e feedback em tempo real.</h1>
+      <p class="muted">7 dias grátis • Depois Premium £19.99/mês ou £199/ano • Cancela quando quiseres.</p>
+      <div class="cta">
+        <a class="btn primary" href="#treinos">Criar meu plano</a>
+        <a class="btn" href="#camera">Abrir Motion Coach</a>
+        <a class="btn ghost" href="#conta">Criar conta</a>
       </div>
-      <nav>
-        <a href="#home" data-tab="home" class="active">Início</a>
-        <a href="#cartaz" data-tab="cartaz">Planos (Treino & Alimentação)</a>
-      </nav>
     </div>
-  </header>
+    <div class="card">
+      <h2>Resumo</h2>
+      <p>Define sexo, objetivo e preferências. Geramos um plano de <b>5 dias</b> por semana e um cardápio simples. Podes imprimir ou guardar.</p>
+      <div class="kpi">
+        <span class="pill">IA local (cam)</span>
+        <span class="pill">Funciona offline</span>
+        <span class="pill">Sem anúncios</span>
+      </div>
+    </div>
+  </section>
 
-  <main class="wrap">
-    <!-- INÍCIO -->
-    <section id="home" class="grid">
-      <div class="hero">
-        <h1>Começa hoje: 7 dias grátis no <span class="ok">Premium</span></h1>
-        <p>Gera treinos personalizados, plano alimentar e acompanha progresso. Depois: plano mensal £19.99 ou anual £199.99.</p>
+  <!-- TREINOS -->
+  <section id="treinos" class="hidden">
+    <div class="card">
+      <h2>Gerar plano</h2>
+      <div class="field">
+        <label for="sexo">Sexo</label>
+        <select id="sexo">
+          <option value="fem">Feminino</option>
+          <option value="masc">Masculino</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="nivel">Nível</label>
+        <select id="nivel">
+          <option value="iniciante">Iniciante</option>
+          <option value="av1">Avançado — Mês 1</option>
+        </select>
+      </div>
+      <div class="cta">
+        <button id="btnGerarTreino" class="btn primary">Gerar 5 dias</button>
+        <button id="btnCopiarTreino" class="btn">Copiar</button>
+      </div>
+    </div>
+
+    <div id="treinoOut" class="cards"></div>
+  </section>
+
+  <!-- ALIMENTAÇÃO -->
+  <section id="alim" class="hidden">
+    <div class="card">
+      <h2>Plano alimentar</h2>
+      <div class="field">
+        <label for="pref">Preferência</label>
+        <select id="pref">
+          <option value="emagrecimento">Emagrecimento</option>
+          <option value="hipertrofia">Hipertrofia</option>
+          <option value="vegetariano">Vegetariano</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="kcal">Calorias alvo</label>
+        <select id="kcal">
+          <option value="1600">1600 kcal</option>
+          <option value="2000">2000 kcal</option>
+          <option value="2400">2400 kcal</option>
+        </select>
+      </div>
+      <div class="cta">
+        <button id="btnGerarAlim" class="btn primary">Gerar cardápio</button>
+        <button id="btnCopiarAlim" class="btn">Copiar</button>
+      </div>
+    </div>
+
+    <div id="alimOut" class="cards"></div>
+  </section>
+
+  <!-- CÂMARA -->
+  <section id="camera" class="hidden">
+    <div class="cam-wrap">
+      <div>
+        <video id="cam" playsinline autoplay muted class="hidden"></video>
+        <canvas id="overlay" class="hidden"></canvas>
+        <div class="toolbar" style="margin-top:8px">
+          <button id="btnStart" class="btn primary">Iniciar câmara</button>
+          <button id="btnStop" class="btn">Terminar</button>
+          <button id="btnPoster" class="btn ghost">Modo Cartaz</button>
+          <span id="camStatus" class="muted">Parado</span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Motion Coach</h2>
+        <p id="tip" class="muted">Dica: posiciona-te ao centro, com boa luz. O “Modo Cartaz” esconde a UI para apresentação.</p>
+        <div class="kpi">
+          <span class="pill">Status: <b id="status">offline</b></span>
+          <span class="pill">Reps: <b id="reps">0</b></span>
+          <span class="pill">Meta: <b id="goal">10</b></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTA -->
+  <section id="conta" class="hidden">
+    <div class="grid">
+      <div class="card">
+        <h2>Criar conta</h2>
+        <p class="muted">Sem password por agora — enviamos um link mágico (simulado nesta versão GitHub Pages).</p>
+        <div class="field"><label>Nome</label><input id="nome" placeholder="O teu nome" /></div>
+        <div class="field"><label>Email</label><input id="email" placeholder="voce@email.com" /></div>
+        <div class="cta"><button id="btnSignup" class="btn primary">Inscrever</button></div>
+        <p id="signupMsg" class="muted"></p>
+      </div>
+      <div class="card">
+        <h2>Plano Premium</h2>
+        <p>7 dias grátis • Depois £19.99/mês ou £199/ano.</p>
+        <p class="muted">Pagamentos reais exigem servidor (Netlify/Stripe). Nesta versão (GitHub Pages) os botões são demonstrativos.</p>
         <div class="cta">
-          <a class="btn primary" href="#cartaz">Ver planos</a>
-          <a class="btn ghost" href="#cartaz">Explorar alimentação</a>
-        </div>
-        <p class="note"><span class="pill">• Sem fidelização</span> <span class="pill">• Funciona offline (PWA)</span></p>
-      </div>
-      <div class="panel">
-        <h2>Destaques</h2>
-        <div class="cards">
-          <div class="card">
-            <h3>Treino Inteligente</h3>
-            <p>Planos por objetivo, sexo e nível. Sem repetir o mesmo grupo em dias seguidos.</p>
-          </div>
-          <div class="card">
-            <h3>Planos Alimentares</h3>
-            <p>Hipertrofia, Emagrecimento e opções Vegetarianas. Versões Femininas e Masculinas.</p>
-          </div>
+          <button id="btnMensal" class="btn">Ativar Mensal</button>
+          <button id="btnAnual" class="btn">Ativar Anual</button>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
+</main>
 
-    <!-- CARTAZ / PLANOS -->
-    <section id="cartaz" class="panel" style="margin-top:20px">
-      <h2>Cartaz de Planos</h2>
-      <p class="note" id="atomoSugestoes">Sugestões rápidas abaixo. <span class="note small">Escolhe e clica em “Abrir cartaz”.</span></p>
+<footer>© AI Trainer — PWA • Offline Ready</footer>
 
-      <div class="form">
-        <div class="row">
-          <div>
-            <label for="sexo">Sexo</label>
-            <select id="sexo">
-              <option value="f">Feminino</option>
-              <option value="m">Masculino</option>
-            </select>
-          </div>
-          <div>
-            <label for="tipo">Tipo</label>
-            <select id="tipo">
-              <option value="treino">Treino</option>
-              <option value="alim">Alimentação</option>
-            </select>
-          </div>
-          <div>
-            <label for="objetivo">Objetivo</label>
-            <select id="objetivo">
-              <!-- será preenchido por JS conforme o tipo -->
-              <option value="iniciante">Iniciante</option>
-            </select>
-          </div>
-        </div>
-
-        <div id="chips" class="chips"></div>
-
-        <div class="toolbar">
-          <button class="btn primary" id="btnVer">Abrir cartaz</button>
-          <a href="#selecionar" class="btn hidden" id="btnVoltar">← voltar à seleção</a>
-        </div>
-      </div>
-
-      <div id="saida" style="margin-top:16px"></div>
-    </section>
-  </main>
-
-  <footer>© AI Trainer — PWA • Offline Ready <span id="swState" class="note"></span></footer>
-
-  <!-- Navegação simples por hash -->
-  <script>
-    const tabs = ["home","cartaz"];
-    function setTab(t){
-      tabs.forEach(id=>{
-        const sec = document.getElementById(id);
-        if(!sec) return;
-        sec.style.display = (id===t) ? "" : "none";
-      });
-      document.querySelectorAll('nav a').forEach(a=>{
-        a.classList.toggle("active", a.dataset.tab===t);
-      });
-    }
-    function fromHash(){
-      const h = (location.hash||"#home").replace("#","");
-      setTab(tabs.includes(h)?h:"home");
-    }
-    window.addEventListener("hashchange", fromHash);
-    fromHash();
-
-    // Registar SW se existir
-    if("serviceWorker" in navigator){
-      navigator.serviceWorker.register("sw.js")
-        .then(()=>{ const s=document.getElementById("swState"); if(s) s.textContent="• SW ativo"; })
-        .catch(()=>{ const s=document.getElementById("swState"); if(s) s.textContent="• SW falhou"; });
-    }
-  </script>
-
-  <!-- Cartaz (dados + lógica) -->
-  <script src="planos/planos.js"></script>
+<script src="planos.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
