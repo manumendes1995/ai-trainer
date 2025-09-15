@@ -4,198 +4,164 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>AI Trainer</title>
-  <meta name="theme-color" content="#0e1325" />
+  <meta name="theme-color" content="#0b1220" />
+  <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="favicon.ico" />
   <style>
     :root{
-      --bg:#0e1325; --panel:#111b36; --muted:#a9b7dd;
-      --brand:#7c4dff; --accent:#58e1c1; --danger:#ff6b6b; --ok:#67e480;
-      --ink:#eaf1ff; --line:#1b2858;
+      --bg:#0b1220; --panel:#0f1a33; --muted:#a3b3d8;
+      --brand:#ffd54a; --accent:#5eead4; --danger:#ff6b6b; --ok:#67e480; --stroke:#1a2c59;
     }
-    *{box-sizing:border-box}
-    html,body{margin:0;height:100%}
-    body{color:var(--ink); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;
-      background:
-        radial-gradient(1100px 650px at 15% 15%, #192654 0%, rgba(14,19,37,0) 55%),
-        radial-gradient(900px 600px at 85% 0%, #0f1a3a 0%, rgba(14,19,37,0) 40%),
-        linear-gradient(#0e1325,#0e1325);
-    }
+    *{box-sizing:border-box} html,body{margin:0;height:100%;color:#eaf1ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial}
+    body{background:radial-gradient(1200px 600px at 15% 20%, #122044 0%, rgba(11,18,32,0) 60%),radial-gradient(1000px 700px at 85% 10%, #1b2d5a 0%, rgba(11,18,32,0) 50%),#0b1220}
     a{color:inherit;text-decoration:none}
-    header{position:sticky;top:0;z-index:10;background:rgba(14,19,37,.85);backdrop-filter:blur(8px); border-bottom:1px solid var(--line)}
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.3px}
-    .logo{width:28px;height:28px;border-radius:8px;background:conic-gradient(from 30deg,var(--brand),#ff8f6b,var(--accent)); box-shadow:0 0 0 2px #0005 inset}
+    header{position:sticky;top:0;z-index:30;background:rgba(11,18,32,.85);backdrop-filter:blur(8px);border-bottom:1px solid #152445}
+    .brand{display:flex;gap:10px;align-items:center;font-weight:800;letter-spacing:.4px}
+    .brand .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#ffd54a,#ff8f6b)}
     nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    nav a{padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#0f1a33;color:#cfe1ff}
-    nav a.active{background:linear-gradient(135deg,var(--brand),#ff8f6b); color:#111}
+    nav a{padding:10px 12px;border-radius:10px;background:#0f1a33;color:#cfe1ff;border:1px solid #152445}
+    nav a.active{background:#122044;color:#fff;border-color:#25407f}
+
     .grid{display:grid;gap:16px}
-    @media(min-width:900px){ .grid{grid-template-columns:1.1fr .9fr} }
-    h1{font-size:clamp(1.6rem,2.6vw,2.4rem);margin:.2rem 0}
-    h2{font-size:clamp(1.2rem,2vw,1.6rem);margin:.8rem 0}
-    p{color:#cdd7f1}
-    .hero{padding:28px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#0f1a33,#0d1730)}
-    .cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
-    .btn{padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0f1a33;color:#fff;cursor:pointer}
-    .btn.primary{background:linear-gradient(135deg,var(--brand),#ff8f6b);color:#111;border:none}
-    .btn.ok{background:linear-gradient(135deg,var(--ok),#b5ffcf);color:#06240f;border:none}
+    @media(min-width:900px){ .grid.cols-2{grid-template-columns:1fr 1fr} }
+    @media(min-width:1200px){ .wrap{padding:24px} }
+
+    .kicker{color:#9bc2ff;text-transform:uppercase;font-weight:700;letter-spacing:.1em;font-size:.82rem}
+    h1{margin:.2rem 0 0; font-size:clamp(1.6rem,2.6vw,2.2rem)}
+    h2{margin:1rem 0 .5rem; font-size:clamp(1.3rem,2.2vw,1.7rem)}
+    p{margin:.5rem 0;color:#cdd7f1}
+    .btn{padding:10px 12px;border-radius:10px;border:1px solid #25407f;background:#122044;color:#fff;cursor:pointer}
     .btn.ghost{background:transparent}
-    .card{border:1px solid var(--line);border-radius:16px;background:#0f1a33;padding:16px}
-    .field{display:grid;gap:6px;margin:10px 0}
-    .field input,.field select,.pill{padding:10px;border-radius:10px;border:1px solid var(--line);background:#0f1a33;color:#fff}
-    .pill{display:inline-block}
-    .cards{display:grid;gap:14px}
-    @media(min-width:900px){ .cards{grid-template-columns:1fr 1fr} }
-    .muted{color:var(--muted)}
-    footer{padding:40px;text-align:center;color:#8ca5d6}
+    .muted{color:#97a1c0}
+    .card{border:1px solid var(--stroke);background:#0f1a33;border-radius:12px;padding:16px}
 
     /* Câmara */
     .cam-wrap{display:grid;gap:12px}
-    @media(min-width:1000px){ .cam-wrap{grid-template-columns:1.2fr .8fr} }
-    video,canvas{width:100%;max-height:65vh;border-radius:16px;border:1px solid var(--line);background:#000}
+    @media(min-width:1000px){ .cam-wrap{grid-template-columns: 2fr 1fr} }
+    video,canvas{width:100%;height:auto;border-radius:16px;border:1px solid var(--stroke);background:#000}
     .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .hidden{display:none!important}
-    .kpi{display:flex;gap:12px;flex-wrap:wrap}
-    .kpi .pill{border-color:#25407f}
+    .pill{padding:6px 10px;border-radius:999px;border:1px solid #25407f;background:#122044}
+
+    .hidden{display:none}
+    footer{padding:32px;color:#8ca5d6;text-align:center}
   </style>
 </head>
 <body>
 <header>
   <div class="wrap">
     <div class="brand"><div class="logo"></div> AI Trainer</div>
-    <nav id="nav">
-      <a href="#home" data-tab="home" class="active">Início</a>
-      <a href="#treinos" data-tab="treinos">Treinos</a>
-      <a href="#alim" data-tab="alim">Alimentação</a>
-      <a href="#camera" data-tab="camera">Motion Coach</a>
-      <a href="#conta" data-tab="conta">Conta</a>
+    <nav id="topnav">
+      <a href="#home"        data-tab="home"       class="active">Início</a>
+      <a href="#camera"      data-tab="camera">Câmara</a>
+      <a href="#treinos"     data-tab="treinos">Treinos</a>
+      <a href="#alimentacao" data-tab="alimentacao">Alimentação</a>
+      <a href="#conta"       data-tab="conta">Conta</a>
     </nav>
   </div>
 </header>
 
 <main class="wrap">
   <!-- HOME -->
-  <section id="home" class="grid">
-    <div class="hero">
-      <h1>Treina melhor com IA — plano, nutrição e feedback em tempo real.</h1>
-      <p class="muted">7 dias grátis • Depois Premium £19.99/mês ou £199/ano • Cancela quando quiseres.</p>
-      <p class="muted"><b>Novo conteúdo todos os meses:</b> lançamos <b>novos treinos mensais</b> e <b>alternamos os cardápios</b> para manter a evolução e a motivação.</p>
-      <div class="cta">
-        <a class="btn primary" href="#treinos">Criar meu plano</a>
-        <a class="btn" href="#camera">Abrir Motion Coach</a>
-        <a class="btn ghost" href="#conta">Criar conta</a>
-      </div>
-    </div>
+  <section id="home" class="tab">
     <div class="card">
-      <h2>Resumo</h2>
-      <p>Define sexo, objetivo e preferências. Geramos um plano de <b>5 dias</b> por semana e um cardápio simples. Podes imprimir ou guardar.</p>
-      <div class="kpi">
-        <span class="pill">IA local (cam)</span>
-        <span class="pill">Funciona offline</span>
-        <span class="pill">Sem anúncios</span>
+      <div class="kicker">Bem-vinda(o)</div>
+      <h1>Junta-te a milhares no AI Trainer</h1>
+      <p>Treinos inteligentes, correção de postura por IA, cardápios com quantidades, e evolução automática de planos a cada 30 dias.</p>
+      <p class="muted">7 dias grátis no Premium (em breve). Podes começar já com as ferramentas gratuitas.</p>
+    </div>
+  </section>
+
+  <!-- CÂMARA -->
+  <section id="camera" class="tab hidden">
+    <h2>Câmara + IA</h2>
+    <div class="cam-wrap">
+      <div class="card">
+        <div style="position:relative">
+          <video id="cameraVideo" playsinline muted></video>
+          <canvas id="cameraCanvas" style="position:absolute;left:0;top:0;"></canvas>
+        </div>
+        <div class="toolbar" style="margin-top:10px">
+          <button class="btn" id="btnStart">Iniciar</button>
+          <button class="btn ghost" id="btnStop">Parar</button>
+          <span class="pill">Estado: <strong id="camStatus">parado</strong></span>
+          <span class="pill">Reps: <strong id="reps">0</strong></span>
+          <span class="pill">Dica: <strong id="tip">—</strong></span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Modo</h3>
+        <select id="exercise" class="btn" style="width:100%">
+          <option value="arm-right">Braço direito (flex/estende)</option>
+          <option value="arm-left">Braço esquerdo (flex/estende)</option>
+          <option value="squat">Agachamento</option>
+        </select>
+        <p class="muted" style="margin-top:8px">A IA dá sugestões de correção base (sem mostrar esqueleto).</p>
       </div>
     </div>
   </section>
 
   <!-- TREINOS -->
-  <section id="treinos" class="hidden">
+  <section id="treinos" class="tab hidden">
+    <h2>Planos de Treino</h2>
     <div class="card">
-      <h2>Gerar plano</h2>
-      <div class="field">
-        <label for="sexo">Sexo</label>
-        <select id="sexo">
-          <option value="fem">Feminino</option>
-          <option value="masc">Masculino</option>
-        </select>
+      <div class="toolbar">
+        <label>Género:
+          <select id="selGenero" class="btn">
+            <option value="f">Feminino</option>
+            <option value="m">Masculino</option>
+          </select>
+        </label>
+        <label>Nível:
+          <select id="selNivel" class="btn">
+            <option value="iniciante">Iniciante (5 dias)</option>
+            <option value="avancado">Avançado (6 dias)</option>
+          </select>
+        </label>
+        <button id="btnVerPlano" class="btn">Ver Plano</button>
       </div>
-      <div class="field">
-        <label for="nivel">Nível</label>
-        <select id="nivel">
-          <option value="iniciante">Iniciante</option>
-          <option value="av1">Avançado — Mês 1</option>
-        </select>
-      </div>
-      <div class="cta">
-        <button id="btnGerarTreino" class="btn primary">Gerar 5 dias</button>
-        <button id="btnCopiarTreino" class="btn">Copiar</button>
-      </div>
+      <div id="planoOut" style="margin-top:12px"></div>
     </div>
-
-    <div id="treinoOut" class="cards"></div>
   </section>
 
   <!-- ALIMENTAÇÃO -->
-  <section id="alim" class="hidden">
+  <section id="alimentacao" class="tab hidden">
+    <h2>Cardápios</h2>
     <div class="card">
-      <h2>Plano alimentar</h2>
-      <div class="field">
-        <label for="pref">Preferência</label>
-        <select id="pref">
-          <option value="emagrecimento">Emagrecimento</option>
-          <option value="hipertrofia">Hipertrofia</option>
-          <option value="vegetariano">Vegetariano</option>
-        </select>
+      <div class="toolbar">
+        <label>Objetivo:
+          <select id="selObj" class="btn">
+            <option value="emagrecimento">Emagrecimento</option>
+            <option value="hipertrofia">Hipertrofia</option>
+          </select>
+        </label>
+        <label>Tipo:
+          <select id="selTipo" class="btn">
+            <option value="omni">Omnívoro</option>
+            <option value="vegetariano">Vegetariano</option>
+            <option value="lactante">Lactante</option>
+          </select>
+        </label>
+        <button id="btnVerMenu" class="btn">Ver Cardápio</button>
       </div>
-      <div class="field">
-        <label for="kcal">Calorias alvo</label>
-        <select id="kcal">
-          <option value="1600">1600 kcal</option>
-          <option value="2000">2000 kcal</option>
-          <option value="2400">2400 kcal</option>
-        </select>
-      </div>
-      <div class="cta">
-        <button id="btnGerarAlim" class="btn primary">Gerar cardápio</button>
-        <button id="btnCopiarAlim" class="btn">Copiar</button>
-      </div>
-    </div>
-
-    <div id="alimOut" class="cards"></div>
-  </section>
-
-  <!-- CÂMARA -->
-  <section id="camera" class="hidden">
-    <div class="cam-wrap">
-      <div>
-        <video id="cam" playsinline autoplay muted class="hidden"></video>
-        <canvas id="overlay" class="hidden"></canvas>
-        <div class="toolbar" style="margin-top:8px">
-          <button id="btnStart" class="btn primary">Iniciar câmara</button>
-          <button id="btnStop" class="btn">Terminar</button>
-          <button id="btnPoster" class="btn ghost">Modo Cartaz</button>
-          <span id="camStatus" class="muted">Parado</span>
-        </div>
-      </div>
-      <div class="card">
-        <h2>Motion Coach</h2>
-        <p id="tip" class="muted">Dica: posiciona-te ao centro, com boa luz. O “Modo Cartaz” esconde a UI para apresentação.</p>
-        <div class="kpi">
-          <span class="pill">Status: <b id="status">offline</b></span>
-          <span class="pill">Reps: <b id="reps">0</b></span>
-          <span class="pill">Meta: <b id="goal">10</b></span>
-        </div>
-      </div>
+      <div id="menuOut" style="margin-top:12px"></div>
     </div>
   </section>
 
   <!-- CONTA -->
-  <section id="conta" class="hidden">
-    <div class="grid">
-      <div class="card">
-        <h2>Criar conta</h2>
-        <p class="muted">Sem password por agora — enviamos um link mágico (simulado nesta versão GitHub Pages).</p>
-        <div class="field"><label>Nome</label><input id="nome" placeholder="O teu nome" /></div>
-        <div class="field"><label>Email</label><input id="email" placeholder="voce@email.com" /></div>
-        <div class="cta"><button id="btnSignup" class="btn primary">Inscrever</button></div>
-        <p id="signupMsg" class="muted"></p>
+  <section id="conta" class="tab hidden">
+    <h2>Conta</h2>
+    <div id="authBox" class="card">
+      <p id="authStatus" class="muted">Não autenticado</p>
+      <div class="when-logged-out">
+        <label for="authEmail" style="display:block;margin-bottom:6px">O teu email</label>
+        <input id="authEmail" type="email" placeholder="teu@email.com"
+               style="width:100%;padding:10px;border-radius:10px;border:1px solid #1a2c59;background:#0b1220;color:#eaf1ff">
+        <button id="btnSendLink" class="btn" style="margin-top:10px">Enviar link de acesso</button>
+        <p class="muted" style="margin-top:8px">Entrar por link (sem palavra-passe). Verifica spam.</p>
       </div>
-      <div class="card">
-        <h2>Plano Premium</h2>
-        <p>7 dias grátis • Depois £19.99/mês ou £199/ano.</p>
-        <p class="muted">Pagamentos reais exigem servidor (Netlify/Stripe). Nesta versão (GitHub Pages) os botões são demonstrativos.</p>
-        <div class="cta">
-          <button id="btnMensal" class="btn">Ativar Mensal</button>
-          <button id="btnAnual" class="btn">Ativar Anual</button>
-        </div>
+      <div class="when-logged-in" style="display:none;margin-top:8px">
+        <button id="btnLogout" class="btn ghost">Terminar sessão</button>
       </div>
     </div>
   </section>
@@ -203,7 +169,108 @@
 
 <footer>© AI Trainer — PWA • Offline Ready</footer>
 
-<script src="planos.js"></script>
-<script src="script.js"></script>
+<!-- TFJS + Pose Detection (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.20.0/dist/tf-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.20.0/dist/tf-converter.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.20.0/dist/tf-backend-webgl.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
+
+<!-- App lógica (câmara IA + treinos + menus) -->
+<script src="ia.js"></script>
+
+<!-- Firebase (inline, para não precisares de ficheiros extra) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+  import {
+    getAuth, onAuthStateChanged,
+    isSignInWithEmailLink, sendSignInLinkToEmail, signInWithEmailLink, signOut
+  } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+
+  // 👇 COLOCA as tuas chaves Firebase aqui
+  const firebaseConfig = {
+    apiKey: "COLOCA_AQUI",
+    authDomain: "COLOCA_AQUI.firebaseapp.com",
+    projectId: "COLOCA_AQUI",
+    storageBucket: "COLOCA_AQUI.appspot.com",
+    messagingSenderId: "COLOCA_AQUI",
+    appId: "COLOCA_AQUI",
+    measurementId: "G-XXXXXXX"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Completar login por email link
+  (async function completeIfEmailLink(){
+    try {
+      if (isSignInWithEmailLink(auth, window.location.href)) {
+        let email = window.localStorage.getItem("ai.trainer.emailForSignIn");
+        if (!email) email = prompt("Confirma o teu email para concluir:");
+        await signInWithEmailLink(auth, email, window.location.href);
+        window.localStorage.removeItem("ai.trainer.emailForSignIn");
+        history.replaceState({}, "", window.location.pathname + window.location.hash);
+      }
+    } catch(e){ console.error(e); alert("Falha ao concluir sessão: " + (e?.message||e)); }
+  })();
+
+  const $ = (id)=>document.getElementById(id);
+  const statusSpan = $("authStatus");
+  const authBox = $("authBox");
+
+  onAuthStateChanged(auth, (user)=>{
+    if(user){
+      statusSpan.textContent = `Autenticado: ${user.email}`;
+      authBox.classList.add("logged");
+    } else {
+      statusSpan.textContent = "Não autenticado";
+      authBox.classList.remove("logged");
+    }
+    syncUI();
+  });
+
+  function syncUI(){
+    authBox.querySelector(".when-logged-in").style.display  = authBox.classList.contains("logged")? "block":"none";
+    authBox.querySelector(".when-logged-out").style.display = authBox.classList.contains("logged")? "none":"block";
+  }
+
+  $("btnSendLink")?.addEventListener("click", async ()=>{
+    try{
+      const email = ($("authEmail").value||"").trim();
+      if(!email) return alert("Escreve o teu email.");
+      const actionCodeSettings = { url: window.location.origin + window.location.pathname + "#conta", handleCodeInApp:true };
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      window.localStorage.setItem("ai.trainer.emailForSignIn", email);
+      alert(`Enviámos um link de acesso para ${email}.`);
+    }catch(e){ console.error(e); alert("Não foi possível enviar o link: " + (e?.message||e)); }
+  });
+
+  $("btnLogout")?.addEventListener("click", ()=>signOut(auth));
+</script>
+
+<script>
+  // Tabs simples por hash (mantém teu visual)
+  const tabs = ["home","camera","treinos","alimentacao","conta"];
+  function showTab(t){
+    tabs.forEach(id=>{
+      const sec = document.getElementById(id);
+      if(sec) sec.classList.toggle("hidden", id!==t);
+      document.querySelectorAll('nav a[data-tab]').forEach(a=>{
+        a.classList.toggle("active", a.dataset.tab===t);
+      });
+    });
+  }
+  window.addEventListener("hashchange", ()=>{
+    const t = location.hash.replace("#","") || "home";
+    showTab(tabs.includes(t)?t:"home");
+  });
+  showTab((location.hash||"#home").replace("#",""));
+
+  // Service Worker (se tiveres sw.js)
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("sw.js")
+      .then(()=>console.log("SW registado ✅"))
+      .catch(()=>console.warn("SW falhou"));
+  }
+</script>
 </body>
 </html>

@@ -1,0 +1,269 @@
+{
+  "feminino": {
+    "iniciante": {
+      "dias": [
+        { "nome": "Dia 1 — Inferiores & Glúteo",
+          "exercicios": [
+            "Agachamento livre — 3x12",
+            "Cadeira extensora — 3x12",
+            "Cadeira abdutora — 3x15",
+            "Elevação pélvica — 4x12",
+            "Afundos caminhando — 3x12 (cada)",
+            "Mesa flexora — 3x12",
+            "Panturrilha em pé — 4x15"
+          ]
+        },
+        { "nome": "Dia 2 — Superiores (Peito/Tríceps/Ombros)",
+          "exercicios": [
+            "Supino máquina — 3x12",
+            "Crucifixo halteres — 3x12",
+            "Tríceps na polia — 3x12",
+            "Desenvolvimento halteres — 3x12",
+            "Elevação lateral — 3x15",
+            "Flexão de braços inclinada — 3x10",
+            "Prancha — 3x30s"
+          ]
+        },
+        { "nome": "Dia 3 — Posterior & Glúteo (ênfase)",
+          "exercicios": [
+            "Levantamento terra romeno — 4x10",
+            "Cadeira flexora — 3x12",
+            "Passada no step — 3x12 (cada)",
+            "Elevação pélvica com pausa — 4x10",
+            "Abdução no cabo — 3x15",
+            "Glúteo máquina — 3x12",
+            "Prancha lateral — 3x30s (cada)"
+          ]
+        },
+        { "nome": "Dia 4 — Costas/Bíceps + Ombros",
+          "exercicios": [
+            "Puxada frente — 3x12",
+            "Remada baixa — 3x12",
+            "Rosca direta — 3x12",
+            "Rosca martelo — 3x12",
+            "Face pull — 3x15",
+            "Elevação lateral — 3x15",
+            "Abdominal infra — 3x15"
+          ]
+        },
+        { "nome": "Dia 5 — Quadríceps & Glúteo",
+          "exercicios": [
+            "Agachamento goblet — 4x12",
+            "Leg press — 4x12",
+            "Avanço no smith — 3x10 (cada)",
+            "Cadeira extensora (drop-set) — 3x12+",
+            "Elevação pélvica — 4x10",
+            "Panturrilha sentado — 4x15",
+            "Prancha — 3x30s"
+          ]
+        }
+      ],
+      "cardio": "HIIT 1x/semana (10–15 min) ou LISS 25–30 min após superiores."
+    },
+    "avancado": {
+      "dias": [
+        { "nome": "Dia 1 — Peito/Tríceps/ABS",
+          "exercicios": [
+            "Supino reto halteres — 4x8–10",
+            "Supino inclinado barra — 4x8–10",
+            "Crucifixo máquina — 3x12",
+            "Paralelas assistidas — 3x10",
+            "Tríceps testa — 3x10",
+            "Tríceps corda — 3x12",
+            "Abdominal cable crunch — 4x12"
+          ]
+        },
+        { "nome": "Dia 2 — Pernas (ênfase quadríceps/glúteo)",
+          "exercicios": [
+            "Agachamento livre — 5x5–8",
+            "Leg press pés juntos — 4x10",
+            "Cadeira extensora — 4x12",
+            "Passada no smith — 3x12 (cada)",
+            "Elevação pélvica — 4x10",
+            "Panturrilha em pé — 4x15",
+            "ABS pranchas — 3x45s"
+          ]
+        },
+        { "nome": "Dia 3 — Costas/Bíceps/Ombro/Trapézio",
+          "exercicios": [
+            "Barra fixa assistida — 4x6–8",
+            "Remada curvada — 4x8–10",
+            "Puxada neutra — 3x10",
+            "Rosca direta — 3x10",
+            "Rosca alternada — 3x12",
+            "Desenvolvimento militar — 4x8",
+            "Encolhimento — 3x12"
+          ]
+        },
+        { "nome": "Dia 4 — Pernas (ênfase posterior)",
+          "exercicios": [
+            "Levantamento terra romeno — 4x8–10",
+            "Mesa flexora — 4x10",
+            "Glúteo 4 apoios no cabo — 3x12 (cada)",
+            "Elevação pélvica — 4x8–10",
+            "Agachamento búlgaro — 3x10 (cada)",
+            "Panturrilha sentado — 4x15",
+            "ABS bicicleta — 3x20"
+          ]
+        },
+        { "nome": "Dia 5 — Peito/Tríceps/ABS (variações)",
+          "exercicios": [
+            "Supino declinado — 4x8–10",
+            "Crucifixo inclinado — 3x12",
+            "Cross-over — 3x12",
+            "Mergulho em banco — 3x12",
+            "Tríceps francês — 3x10",
+            "Tríceps corda (drop) — 3x12+",
+            "Prancha — 4x45s"
+          ]
+        },
+        { "nome": "Dia 6 — Costas/Bíceps/Ombro/Trapézio (variações)",
+          "exercicios": [
+            "Remada unilateral halter — 4x10 (cada)",
+            "Puxada supinada — 4x8–10",
+            "Rosca scott — 3x10",
+            "Rosca martelo banco inclinado — 3x12",
+            "Arnold press — 4x8–10",
+            "Elevação lateral polia — 3x15",
+            "Encolhimento barra — 3x12"
+          ]
+        }
+      ],
+      "cardio": "HIIT 1–2x/semana (10–15 min) e LISS 25–35 min conforme objetivo."
+    }
+  },
+
+  "masculino": {
+    "iniciante": {
+      "dias": [
+        { "nome": "Dia 1 — Peito/Tríceps/ABS",
+          "exercicios": [
+            "Supino reto máquina — 3x12",
+            "Supino inclinado halteres — 3x12",
+            "Crucifixo — 3x12",
+            "Tríceps corda — 3x12",
+            "Tríceps testa — 3x10",
+            "Flexão de braços — 3x12",
+            "Prancha — 3x30s"
+          ]
+        },
+        { "nome": "Dia 2 — Pernas (quad/glúteo)",
+          "exercicios": [
+            "Agachamento livre — 4x10",
+            "Leg press — 4x12",
+            "Cadeira extensora — 3x12",
+            "Passada — 3x12 (cada)",
+            "Elevação pélvica — 3x10",
+            "Panturrilha — 4x15",
+            "ABS infra — 3x15"
+          ]
+        },
+        { "nome": "Dia 3 — Costas/Bíceps/Ombro/Trapézio",
+          "exercicios": [
+            "Puxada frente — 3x12",
+            "Remada baixa — 3x12",
+            "Rosca direta — 3x12",
+            "Rosca alternada — 3x12",
+            "Desenvolvimento halteres — 3x12",
+            "Elevação lateral — 3x15",
+            "Encolhimento — 3x12"
+          ]
+        },
+        { "nome": "Dia 4 — Pernas (posterior)",
+          "exercicios": [
+            "RDL — 4x10",
+            "Mesa flexora — 4x12",
+            "Glúteo no cabo — 3x12 (cada)",
+            "Agachamento búlgaro — 3x10 (cada)",
+            "Panturrilha — 4x15",
+            "ABS prancha — 3x45s",
+            "Abdominal oblíquo — 3x12 (cada)"
+          ]
+        },
+        { "nome": "Dia 5 — Peito/Tríceps/ABS (variações)",
+          "exercicios": [
+            "Supino declinado — 4x10",
+            "Crucifixo inclinado — 3x12",
+            "Cross-over — 3x12",
+            "Tríceps corda — 3x12",
+            "Tríceps francês — 3x10",
+            "Flexão diamante — 3x10",
+            "Prancha — 3x45s"
+          ]
+        }
+      ],
+      "cardio": "Pós-superiores 25–30 min (conforme objetivo). HIIT 1x/semana."
+    },
+    "avancado": {
+      "dias": [
+        { "nome": "Dia 1 — Peito/Tríceps/ABS",
+          "exercicios": [
+            "Supino reto barra — 5x5–8",
+            "Supino inclinado halteres — 4x8–10",
+            "Crucifixo máquina — 3x12",
+            "Paralelas — 3x8–10",
+            "Tríceps testa — 3x10",
+            "Tríceps corda — 3x12",
+            "Cable crunch — 4x12"
+          ]
+        },
+        { "nome": "Dia 2 — Pernas (quad/glúteo)",
+          "exercicios": [
+            "Agachamento livre — 5x5–8",
+            "Leg press pés juntos — 4x10",
+            "Cadeira extensora — 4x12",
+            "Passada no smith — 3x12 (cada)",
+            "Elevação pélvica — 4x8–10",
+            "Panturrilha — 4x15",
+            "ABS prancha — 3x45s"
+          ]
+        },
+        { "nome": "Dia 3 — Costas/Bíceps/Ombro/Trapézio",
+          "exercicios": [
+            "Barra fixa — 4x6–8",
+            "Remada curvada — 4x8–10",
+            "Puxada neutra — 3x10",
+            "Rosca direta — 3x10",
+            "Rosca alternada — 3x12",
+            "Desenvolvimento militar — 4x8",
+            "Encolhimento — 3x12"
+          ]
+        },
+        { "nome": "Dia 4 — Pernas (posterior)",
+          "exercicios": [
+            "RDL — 4x8–10",
+            "Mesa flexora — 4x10",
+            "Glúteo cabo — 3x12 (cada)",
+            "Búlgaro — 3x10 (cada)",
+            "Panturrilha sentado — 4x15",
+            "ABS bicicleta — 3x20",
+            "Prancha lateral — 3x30s (cada)"
+          ]
+        },
+        { "nome": "Dia 5 — Peito/Tríceps/ABS (variações)",
+          "exercicios": [
+            "Supino declinado — 4x8–10",
+            "Crucifixo inclinado — 3x12",
+            "Cross-over — 3x12",
+            "Mergulho banco — 3x12",
+            "Tríceps francês — 3x10",
+            "Tríceps corda (drop) — 3x12+",
+            "Prancha — 4x45s"
+          ]
+        },
+        { "nome": "Dia 6 — Costas/Bíceps/Ombro/Trapézio (variações)",
+          "exercicios": [
+            "Remada unilateral — 4x10 (cada)",
+            "Puxada supinada — 4x8–10",
+            "Rosca scott — 3x10",
+            "Rosca martelo — 3x12",
+            "Arnold press — 4x8–10",
+            "Elevação lateral polia — 3x15",
+            "Encolhimento barra — 3x12"
+          ]
+        }
+      ],
+      "cardio": "HIIT 1–2x/semana (10–15 min) + LISS 25–35 min consoante objetivo."
+    }
+  }
+}
