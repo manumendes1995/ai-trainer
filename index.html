@@ -1,57 +1,42 @@
 <!doctype html>
 <html lang="pt">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <title>AI Trainer</title>
-  <meta name="theme-color" content="#0b1220" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="favicon.ico" />
+  <meta name="theme-color" content="#0b1220"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" href="favicon.ico"/>
   <style>
     :root{
       --bg:#0b1220; --panel:#0f1a33; --muted:#a3b3d8;
       --brand:#ffd54a; --accent:#5eead4; --danger:#ff6b6b; --ok:#67e480; --stroke:#1a2c59;
     }
-    *{box-sizing:border-box} html,body{margin:0;height:100%;color:#eaf1ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial}
-    body{background:radial-gradient(1200px 600px at 15% 20%, #122044 0%, rgba(11,18,32,0) 60%),radial-gradient(1000px 700px at 85% 10%, #1b2d5a 0%, rgba(11,18,32,0) 50%),#0b1220}
-    a{color:inherit;text-decoration:none}
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;color:#eaf1ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial}
+    body{background:#0b1220}
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    header{position:sticky;top:0;z-index:30;background:rgba(11,18,32,.85);backdrop-filter:blur(8px);border-bottom:1px solid #152445}
-    .brand{display:flex;gap:10px;align-items:center;font-weight:800;letter-spacing:.4px}
-    .brand .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#ffd54a,#ff8f6b)}
+    header{position:sticky;top:0;z-index:30;background:#0b1220;border-bottom:1px solid #152445}
+    .brand{display:flex;gap:10px;align-items:center;font-weight:800}
     nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    nav a{padding:10px 12px;border-radius:10px;background:#0f1a33;color:#cfe1ff;border:1px solid #152445}
+    nav a{padding:10px 12px;border-radius:10px;background:#0f1a33;color:#cfe1ff;border:1px solid #152445;text-decoration:none}
     nav a.active{background:#122044;color:#fff;border-color:#25407f}
-
-    .grid{display:grid;gap:16px}
-    @media(min-width:900px){ .grid.cols-2{grid-template-columns:1fr 1fr} }
-    @media(min-width:1200px){ .wrap{padding:24px} }
-
-    .kicker{color:#9bc2ff;text-transform:uppercase;font-weight:700;letter-spacing:.1em;font-size:.82rem}
-    h1{margin:.2rem 0 0; font-size:clamp(1.6rem,2.6vw,2.2rem)}
-    h2{margin:1rem 0 .5rem; font-size:clamp(1.3rem,2.2vw,1.7rem)}
-    p{margin:.5rem 0;color:#cdd7f1}
+    .card{border:1px solid var(--stroke);background:#0f1a33;border-radius:12px;padding:16px;margin-top:12px}
     .btn{padding:10px 12px;border-radius:10px;border:1px solid #25407f;background:#122044;color:#fff;cursor:pointer}
     .btn.ghost{background:transparent}
     .muted{color:#97a1c0}
-    .card{border:1px solid var(--stroke);background:#0f1a33;border-radius:12px;padding:16px}
-
-    /* Câmara */
-    .cam-wrap{display:grid;gap:12px}
-    @media(min-width:1000px){ .cam-wrap{grid-template-columns: 2fr 1fr} }
-    video,canvas{width:100%;height:auto;border-radius:16px;border:1px solid var(--stroke);background:#000}
-    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .pill{padding:6px 10px;border-radius:999px;border:1px solid #25407f;background:#122044}
-
     .hidden{display:none}
-    footer{padding:32px;color:#8ca5d6;text-align:center}
+    video,canvas{width:100%;height:auto;border-radius:12px;border:1px solid var(--stroke);background:#000}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+    .pill{padding:6px 10px;border-radius:999px;border:1px solid #25407f;background:#122044}
+    footer{padding:24px;color:#8ca5d6;text-align:center}
   </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <div class="brand"><div class="logo"></div> AI Trainer</div>
-    <nav id="topnav">
+    <div class="brand">AI Trainer</div>
+    <nav>
       <a href="#home"        data-tab="home"       class="active">Início</a>
       <a href="#camera"      data-tab="camera">Câmara</a>
       <a href="#treinos"     data-tab="treinos">Treinos</a>
@@ -65,46 +50,43 @@
   <!-- HOME -->
   <section id="home" class="tab">
     <div class="card">
-      <div class="kicker">Bem-vinda(o)</div>
-      <h1>Junta-te a milhares no AI Trainer</h1>
-      <p>Treinos inteligentes, correção de postura por IA, cardápios com quantidades, e evolução automática de planos a cada 30 dias.</p>
-      <p class="muted">7 dias grátis no Premium (em breve). Podes começar já com as ferramentas gratuitas.</p>
+      <h1>Treina com IA</h1>
+      <p class="muted">Correção de postura, contagem de repetições, planos de treino e cardápios com quantidades.</p>
+      <div class="toolbar">
+        <a class="btn" href="#conta">Criar conta</a>
+        <a class="btn ghost" href="#camera">Abrir Câmara</a>
+      </div>
     </div>
   </section>
 
   <!-- CÂMARA -->
   <section id="camera" class="tab hidden">
-    <h2>Câmara + IA</h2>
-    <div class="cam-wrap">
-      <div class="card">
-        <div style="position:relative">
-          <video id="cameraVideo" playsinline muted></video>
-          <canvas id="cameraCanvas" style="position:absolute;left:0;top:0;"></canvas>
-        </div>
-        <div class="toolbar" style="margin-top:10px">
-          <button class="btn" id="btnStart">Iniciar</button>
-          <button class="btn ghost" id="btnStop">Parar</button>
-          <span class="pill">Estado: <strong id="camStatus">parado</strong></span>
-          <span class="pill">Reps: <strong id="reps">0</strong></span>
-          <span class="pill">Dica: <strong id="tip">—</strong></span>
-        </div>
+    <div class="card">
+      <h2>Câmara + IA</h2>
+      <div style="position:relative">
+        <video id="cameraVideo" playsinline muted></video>
+        <canvas id="cameraCanvas" style="position:absolute;left:0;top:0;"></canvas>
       </div>
-      <div class="card">
-        <h3>Modo</h3>
-        <select id="exercise" class="btn" style="width:100%">
-          <option value="arm-right">Braço direito (flex/estende)</option>
-          <option value="arm-left">Braço esquerdo (flex/estende)</option>
+      <div class="toolbar">
+        <button id="btnStart" class="btn">Iniciar</button>
+        <button id="btnStop" class="btn ghost">Parar</button>
+        <select id="exercise" class="btn">
+          <option value="arm-right">Braço direito</option>
+          <option value="arm-left">Braço esquerdo</option>
           <option value="squat">Agachamento</option>
         </select>
-        <p class="muted" style="margin-top:8px">A IA dá sugestões de correção base (sem mostrar esqueleto).</p>
+        <span class="pill">Estado: <strong id="camStatus">parado</strong></span>
+        <span class="pill">Reps: <strong id="reps">0</strong></span>
+        <span class="pill">Dica: <strong id="tip">—</strong></span>
       </div>
+      <p class="muted" style="margin-top:8px">Se a câmara não abrir no iPhone, usa o Safari e aceita a permissão.</p>
     </div>
   </section>
 
   <!-- TREINOS -->
   <section id="treinos" class="tab hidden">
-    <h2>Planos de Treino</h2>
     <div class="card">
+      <h2>Planos de Treino</h2>
       <div class="toolbar">
         <label>Género:
           <select id="selGenero" class="btn">
@@ -120,14 +102,14 @@
         </label>
         <button id="btnVerPlano" class="btn">Ver Plano</button>
       </div>
-      <div id="planoOut" style="margin-top:12px"></div>
+      <div id="planoOut"></div>
     </div>
   </section>
 
   <!-- ALIMENTAÇÃO -->
   <section id="alimentacao" class="tab hidden">
-    <h2>Cardápios</h2>
     <div class="card">
+      <h2>Cardápios com quantidades</h2>
       <div class="toolbar">
         <label>Objetivo:
           <select id="selObj" class="btn">
@@ -144,30 +126,21 @@
         </label>
         <button id="btnVerMenu" class="btn">Ver Cardápio</button>
       </div>
-      <div id="menuOut" style="margin-top:12px"></div>
+      <div id="menuOut"></div>
     </div>
   </section>
 
   <!-- CONTA -->
   <section id="conta" class="tab hidden">
-    <h2>Conta</h2>
-    <div id="authBox" class="card">
-      <p id="authStatus" class="muted">Não autenticado</p>
-      <div class="when-logged-out">
-        <label for="authEmail" style="display:block;margin-bottom:6px">O teu email</label>
-        <input id="authEmail" type="email" placeholder="teu@email.com"
-               style="width:100%;padding:10px;border-radius:10px;border:1px solid #1a2c59;background:#0b1220;color:#eaf1ff">
-        <button id="btnSendLink" class="btn" style="margin-top:10px">Enviar link de acesso</button>
-        <p class="muted" style="margin-top:8px">Entrar por link (sem palavra-passe). Verifica spam.</p>
-      </div>
-      <div class="when-logged-in" style="display:none;margin-top:8px">
-        <button id="btnLogout" class="btn ghost">Terminar sessão</button>
-      </div>
+    <div class="card">
+      <h2>Conta</h2>
+      <p>Inscrição por email estará disponível no próximo passo. Por agora, usa as áreas gratuitas.</p>
+      <a class="btn" href="#home">Voltar ao início</a>
     </div>
   </section>
 </main>
 
-<footer>© AI Trainer — PWA • Offline Ready</footer>
+<footer>© AI Trainer</footer>
 
 <!-- TFJS + Pose Detection (CDN) -->
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.20.0/dist/tf-core.min.js"></script>
@@ -175,84 +148,15 @@
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.20.0/dist/tf-backend-webgl.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
 
-<!-- App lógica (câmara IA + treinos + menus) -->
+<!-- App -->
 <script src="ia.js"></script>
 
-<!-- Firebase (inline, para não precisares de ficheiros extra) -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-  import {
-    getAuth, onAuthStateChanged,
-    isSignInWithEmailLink, sendSignInLinkToEmail, signInWithEmailLink, signOut
-  } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-
-  // 👇 COLOCA as tuas chaves Firebase aqui
-  const firebaseConfig = {
-    apiKey: "COLOCA_AQUI",
-    authDomain: "COLOCA_AQUI.firebaseapp.com",
-    projectId: "COLOCA_AQUI",
-    storageBucket: "COLOCA_AQUI.appspot.com",
-    messagingSenderId: "COLOCA_AQUI",
-    appId: "COLOCA_AQUI",
-    measurementId: "G-XXXXXXX"
-  };
-
-  const app  = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  // Completar login por email link
-  (async function completeIfEmailLink(){
-    try {
-      if (isSignInWithEmailLink(auth, window.location.href)) {
-        let email = window.localStorage.getItem("ai.trainer.emailForSignIn");
-        if (!email) email = prompt("Confirma o teu email para concluir:");
-        await signInWithEmailLink(auth, email, window.location.href);
-        window.localStorage.removeItem("ai.trainer.emailForSignIn");
-        history.replaceState({}, "", window.location.pathname + window.location.hash);
-      }
-    } catch(e){ console.error(e); alert("Falha ao concluir sessão: " + (e?.message||e)); }
-  })();
-
-  const $ = (id)=>document.getElementById(id);
-  const statusSpan = $("authStatus");
-  const authBox = $("authBox");
-
-  onAuthStateChanged(auth, (user)=>{
-    if(user){
-      statusSpan.textContent = `Autenticado: ${user.email}`;
-      authBox.classList.add("logged");
-    } else {
-      statusSpan.textContent = "Não autenticado";
-      authBox.classList.remove("logged");
-    }
-    syncUI();
-  });
-
-  function syncUI(){
-    authBox.querySelector(".when-logged-in").style.display  = authBox.classList.contains("logged")? "block":"none";
-    authBox.querySelector(".when-logged-out").style.display = authBox.classList.contains("logged")? "none":"block";
-  }
-
-  $("btnSendLink")?.addEventListener("click", async ()=>{
-    try{
-      const email = ($("authEmail").value||"").trim();
-      if(!email) return alert("Escreve o teu email.");
-      const actionCodeSettings = { url: window.location.origin + window.location.pathname + "#conta", handleCodeInApp:true };
-      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-      window.localStorage.setItem("ai.trainer.emailForSignIn", email);
-      alert(`Enviámos um link de acesso para ${email}.`);
-    }catch(e){ console.error(e); alert("Não foi possível enviar o link: " + (e?.message||e)); }
-  });
-
-  $("btnLogout")?.addEventListener("click", ()=>signOut(auth));
-</script>
-
 <script>
-  // Tabs simples por hash (mantém teu visual)
+  // Tabs por hash
   const tabs = ["home","camera","treinos","alimentacao","conta"];
   function showTab(t){
     tabs.forEach(id=>{
-      const sec = document.getElementById(id);
+      const sec=document.getElementById(id);
       if(sec) sec.classList.toggle("hidden", id!==t);
       document.querySelectorAll('nav a[data-tab]').forEach(a=>{
         a.classList.toggle("active", a.dataset.tab===t);
@@ -260,17 +164,48 @@
     });
   }
   window.addEventListener("hashchange", ()=>{
-    const t = location.hash.replace("#","") || "home";
+    const t=(location.hash||"#home").slice(1);
     showTab(tabs.includes(t)?t:"home");
   });
-  showTab((location.hash||"#home").replace("#",""));
+  showTab((location.hash||"#home").slice(1)||"home");
 
-  // Service Worker (se tiveres sw.js)
-  if("serviceWorker" in navigator){
-    navigator.serviceWorker.register("sw.js")
-      .then(()=>console.log("SW registado ✅"))
-      .catch(()=>console.warn("SW falhou"));
-  }
+  // Treinos
+  document.getElementById("btnVerPlano")?.addEventListener("click", async ()=>{
+    const genero=document.getElementById("selGenero").value;
+    const nivel=document.getElementById("selNivel").value;
+    const out=document.getElementById("planoOut");
+    out.innerHTML="A carregar...";
+    try{
+      const data=await (await fetch("data/planos.json",{cache:"no-store"})).json();
+      const bloco = data[genero==="f"?"feminino":"masculino"][nivel];
+      let html=`<p class="muted">${bloco.cardio||""}</p>`;
+      (bloco.dias||[]).forEach(d=>{
+        html+=`<div class="card"><h3>${d.nome}</h3><ul>`+
+              d.exercicios.map(x=>`<li>${x}</li>`).join("")+
+              `</ul></div>`;
+      });
+      out.innerHTML=html;
+    }catch(e){ console.error(e); out.innerHTML="<p class='muted'>Falha ao carregar plano.</p>"; }
+  });
+
+  // Cardápios
+  document.getElementById("btnVerMenu")?.addEventListener("click", async ()=>{
+    const obj=document.getElementById("selObj").value;
+    const tipo=document.getElementById("selTipo").value;
+    const out=document.getElementById("menuOut");
+    out.innerHTML="A carregar...";
+    try{
+      const data=await (await fetch("data/menus.json",{cache:"no-store"})).json();
+      const bloco = data[obj][tipo];
+      let html=`<p class="muted">${bloco.kcal||""}</p>`;
+      (bloco.refeicoes||[]).forEach(r=>{
+        html+=`<div class="card"><h3>${r.nome}</h3><ul>`+
+              r.itens.map(x=>`<li>${x}</li>`).join("")+
+              `</ul></div>`;
+      });
+      out.innerHTML=html;
+    }catch(e){ console.error(e); out.innerHTML="<p class='muted'>Falha ao carregar cardápio.</p>"; }
+  });
 </script>
 </body>
 </html>

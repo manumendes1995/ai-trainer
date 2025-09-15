@@ -14,18 +14,22 @@ let stream = null, detector = null, raf = 0;
 let reps = 0, phase = "up";
 
 // ===== Util
-const setStatus = (t)=> statusEl.textContent = t;
-const setTip = (t)=> tipEl.textContent = t;
+const setStatus = (t)=> statusEl && (statusEl.textContent = t);
+const setTip = (t)=> tipEl && (tipEl.textContent = t);
 
 // ===== Camera
 async function openCamera(){
   if(stream) return;
-  stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"user", width:{ideal:640}, height:{ideal:480} }, audio:false });
+  stream = await navigator.mediaDevices.getUserMedia({
+    video:{ facingMode:"user", width:{ideal:640}, height:{ideal:480} }, audio:false
+  });
   video.srcObject = stream;
   await video.play();
   // ajustar canvas
-  canvas.width = video.videoWidth || 640;
-  canvas.height = video.videoHeight || 480;
+  const w = video.videoWidth || 640, h = video.videoHeight || 480;
+  canvas.width = w; canvas.height = h;
+  canvas.style.width = video.clientWidth+"px";
+  canvas.style.height = (video.clientWidth * h / w) + "px";
 }
 
 // ===== IA (MoveNet)
@@ -40,31 +44,26 @@ async function loadDetector(){
 
 // ===== Regras simples de repetição
 function countReps(keypoints, mode){
-  // pega Y de punho/ombro/anca/joelho para heurísticas simples
-  const byName = {};
-  (keypoints||[]).forEach(k=>byName[k.name]=k);
-  const lh = byName["left_wrist"], rh = byName["right_wrist"];
-  const ls = byName["left_shoulder"], rs = byName["right_shoulder"];
-  const lk = byName["left_knee"], rk = byName["right_knee"];
-  const lhx = byName["left_hip"], rhx = byName["right_hip"];
-  if(!ls || !rs || !lhx || !rhx) return;
+  const by = {};
+  (keypoints||[]).forEach(k=>{ if(k.name) by[k.name]=k; });
+  const lh = by["left_wrist"], rh = by["right_wrist"];
+  const ls = by["left_shoulder"], rs = by["right_shoulder"];
+  const lk = by["left_knee"], rk = by["right_knee"];
+  const lhip = by["left_hip"], rhip = by["right_hip"];
+  if(!ls || !rs || !lhip || !rhip) return;
 
   if(mode==="arm-right" && rh && rs){
-    // braço sobe acima do ombro => fase "up"
     if(rh.y < rs.y - 20){ phase = "up"; setTip("Desce controlado"); }
-    // volta a baixo do ombro => conta
     if(phase==="up" && rh.y > rs.y + 20){ reps++; repsEl.textContent = String(reps); phase="down"; setTip("Sobe o braço"); }
   }
   if(mode==="arm-left" && lh && ls){
     if(lh.y < ls.y - 20){ phase = "up"; setTip("Desce controlado"); }
     if(phase==="up" && lh.y > ls.y + 20){ reps++; repsEl.textContent = String(reps); phase="down"; setTip("Sobe o braço"); }
   }
-  if(mode==="squat" && lk && rk && lhx && rhx){
-    const hipY = (lhx.y + rhx.y)/2;
+  if(mode==="squat" && lk && rk && lhip && rhip){
+    const hipY = (lhip.y + rhip.y)/2;
     const kneeY = (lk.y + rk.y)/2;
-    // joelho abaixo da anca => baixo
     if(kneeY > hipY + 20){ phase="down"; setTip("Sobe com o tronco firme"); }
-    // regressa acima => conta
     if(phase==="down" && kneeY < hipY - 10){ reps++; repsEl.textContent = String(reps); phase="up"; setTip("Desce até 90°"); }
   }
 }
@@ -72,8 +71,7 @@ function countReps(keypoints, mode){
 // ===== Loop
 async function loop(){
   const poses = await detector.estimatePoses(video, { flipHorizontal:true });
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  // (não desenhamos esqueleto – apenas dicas)
+  ctx.clearRect(0,0,canvas.width,canvas.height); // sem esqueleto, só dicas
   if(poses && poses[0] && poses[0].keypoints){
     countReps(poses[0].keypoints, exerciseSel.value);
   }
@@ -90,17 +88,14 @@ btnStart?.addEventListener("click", async ()=>{
     cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
   }catch(e){
     console.error(e);
-    setStatus("erro"); setTip("Permite o acesso à câmara no browser.");
-    alert("A câmara não abriu. Em iPhone/iPad, usa Safari com HTTPS e aceita a permissão.");
+    setStatus("erro"); setTip("Permite o acesso à câmara.");
+    alert("A câmara não abriu. No iPhone usa Safari e aceita a permissão.");
   }
 });
 btnStop?.addEventListener("click", ()=>{
   cancelAnimationFrame(raf);
   setStatus("parado"); setTip("—");
-  if(stream){
-    stream.getTracks().forEach(t=>t.stop());
-    stream = null;
-  }
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream = null; }
 });
 
 console.log("IA pronta.");
