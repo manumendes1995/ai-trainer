@@ -1,211 +1,406 @@
 <!doctype html>
 <html lang="pt">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>AI Trainer</title>
-  <meta name="theme-color" content="#0b1220"/>
-  <link rel="manifest" href="manifest.json"/>
-  <link rel="icon" href="favicon.ico"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Trainer – Treinos, Alimentação e Cardio</title>
+  <meta name="description" content="AI Trainer: treinos guiados, planos de alimentação e cardio/HIIT com visual limpo e responsivo." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
     :root{
-      --bg:#0b1220; --panel:#0f1a33; --muted:#a3b3d8;
-      --brand:#ffd54a; --accent:#5eead4; --danger:#ff6b6b; --ok:#67e480; --stroke:#1a2c59;
+      --bg:#0b0b0f;
+      --panel:#13131a;
+      --panel-2:#1a1b23;
+      --text:#e9eaee;
+      --muted:#b9bcc7;
+      --brand:#ff3b30;       /* botão vermelho */
+      --accent:#ffb01f;      /* cartões destaque amarelo */
+      --glow:#8a1a1a;
+      --ok:#35d07f;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;height:100%;color:#eaf1ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial}
-    body{background:#0b1220}
-    .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    header{position:sticky;top:0;z-index:30;background:#0b1220;border-bottom:1px solid #152445}
-    .brand{display:flex;gap:10px;align-items:center;font-weight:800}
-    nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    nav a{padding:10px 12px;border-radius:10px;background:#0f1a33;color:#cfe1ff;border:1px solid #152445;text-decoration:none}
-    nav a.active{background:#122044;color:#fff;border-color:#25407f}
-    .card{border:1px solid var(--stroke);background:#0f1a33;border-radius:12px;padding:16px;margin-top:12px}
-    .btn{padding:10px 12px;border-radius:10px;border:1px solid #25407f;background:#122044;color:#fff;cursor:pointer}
-    .btn.ghost{background:transparent}
-    .muted{color:#97a1c0}
-    .hidden{display:none}
-    video,canvas{width:100%;height:auto;border-radius:12px;border:1px solid var(--stroke);background:#000}
-    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
-    .pill{padding:6px 10px;border-radius:999px;border:1px solid #25407f;background:#122044}
-    footer{padding:24px;color:#8ca5d6;text-align:center}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:
+        radial-gradient(1000px 600px at 20% -10%, rgba(255,0,0,.08), transparent 60%),
+        radial-gradient(1000px 600px at 90% 120%, rgba(255,100,0,.06), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      line-height:1.5;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* ===== HEADER ===== */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter:saturate(140%) blur(6px);
+      background:rgba(11,11,15,.7);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .wrap{max-width:1200px; margin:auto; padding:0 16px}
+    .row{display:flex; align-items:center; justify-content:space-between; gap:16px}
+    .brand{
+      display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text)
+    }
+    .logo{
+      width:28px;height:28px; display:inline-block; border-radius:6px;
+      background: radial-gradient(120% 120% at 20% 20%, #ff6138, #ff2d2d 45%, #8a1a1a 90%);
+      position:relative; box-shadow:0 0 0 1px rgba(255,255,255,.08) inset, 0 8px 24px rgba(255,45,45,.25);
+    }
+    .logo::after{
+      content:""; position:absolute; inset:6px 6px auto auto; width:8px; height:8px; border-radius:50%;
+      background:#fff3; box-shadow:0 0 0 2px #fff2;
+    }
+    .brand .name{font-weight:800; letter-spacing:.3px}
+    .nav{
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    }
+    .nav a{
+      color:var(--muted); text-decoration:none; font-weight:600; padding:10px 12px; border-radius:10px;
+    }
+    .nav a.active, .nav a:hover{ color:var(--text); background:rgba(255,255,255,.06) }
+    .page-label{
+      margin-left:6px;
+      padding:8px 12px; border:1px solid rgba(255,255,255,.08); border-radius:10px;
+      color:var(--text); font-weight:700;
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0));
+      white-space:nowrap;
+    }
+    .nav-right{display:flex; align-items:center; gap:10px}
+
+    /* ===== HERO ===== */
+    .hero{
+      padding:48px 16px 24px;
+      background:
+        radial-gradient(800px 400px at 80% 0, rgba(255,80,0,.12), transparent 60%),
+        radial-gradient(800px 500px at 10% 90%, rgba(255,0,0,.10), transparent 60%);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .hero-card{
+      background:linear-gradient(180deg, #14141c, #101017);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:22px; padding:28px;
+      box-shadow:0 12px 40px rgba(0,0,0,.35), 0 0 80px -20px var(--glow);
+      display:grid; gap:14px; max-width:940px; margin:auto;
+      text-align:center;
+    }
+    .eyebrow{letter-spacing:.18em; font-size:12px; color:var(--muted); text-transform:uppercase}
+    h1{margin:0; font-size:clamp(28px, 4.5vw, 56px); line-height:1.05}
+    .sub{color:var(--muted); font-weight:600; margin-top:-6px}
+    .cta{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:4px}
+    .btn{
+      appearance:none; border:0; cursor:pointer; font-weight:800; letter-spacing:.3px;
+      padding:12px 18px; border-radius:14px; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+    }
+    .btn-primary{ background:linear-gradient(180deg, #ff4a3f, #e32e24); color:white; box-shadow:0 8px 24px rgba(227,46,36,.45) }
+    .btn-primary:hover{ transform:translateY(-1px) }
+    .btn-ghost{ background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.12) }
+
+    /* ===== GRID SECTIONS ===== */
+    section{padding:36px 0}
+    .grid{display:grid; grid-template-columns:repeat(12,1fr); gap:16px}
+    .panel{
+      grid-column:span 12;
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:20px; padding:18px;
+      box-shadow:0 6px 24px rgba(0,0,0,.25);
+    }
+    .panel h2{margin:2px 0 14px; font-size:clamp(20px, 2.8vw, 32px)}
+    .kicker{font-weight:800; color:#fff; letter-spacing:.12em; font-size:12px; text-transform:uppercase}
+    .chips{display:flex; gap:10px; flex-wrap:wrap}
+    .chip{
+      padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10); color:var(--text); font-weight:700; cursor:default;
+    }
+    .two{display:grid; grid-template-columns:1fr; gap:14px}
+    .list{display:grid; gap:6px}
+    .list .item{display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:12px; background:rgba(255,255,255,.04)}
+    .badge{font-weight:800; font-size:12px; color:#fff; background:#00000033; border:1px solid rgba(255,255,255,.1); padding:4px 8px; border-radius:999px}
+
+    .note{
+      font-size:13px; color:var(--muted);
+      border-top:1px dashed rgba(255,255,255,.12); margin-top:10px; padding-top:10px;
+    }
+
+    .cols-3{display:grid; grid-template-columns:1fr; gap:14px}
+    .card{
+      background:linear-gradient(180deg, #15151d, #101018);
+      border:1px solid rgba(255,255,255,.06); border-radius:18px; padding:14px 14px 12px;
+    }
+    .card h3{margin:0 0 8px; font-size:18px}
+    .tag{display:inline-block; font-size:11px; font-weight:800; letter-spacing:.12em; color:#111; background:var(--accent); padding:6px 10px; border-radius:999px}
+
+    .water{
+      display:grid; grid-template-columns:1fr 1fr; gap:10px;
+    }
+    .water .w{background:#0f1016; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:10px}
+    .water .w strong{display:block; font-size:14px}
+
+    footer{padding:28px 16px 48px; color:var(--muted); text-align:center}
+    footer a{color:var(--text)}
+
+    /* Responsive */
+    @media (min-width:720px){
+      .two{grid-template-columns:1fr 1fr}
+      .cols-3{grid-template-columns:repeat(3,1fr)}
+      .panel{padding:22px}
+    }
   </style>
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <div class="brand">AI Trainer</div>
-    <nav>
-      <a href="#home"        data-tab="home"       class="active">Início</a>
-      <a href="#camera"      data-tab="camera">Câmara</a>
-      <a href="#treinos"     data-tab="treinos">Treinos</a>
-      <a href="#alimentacao" data-tab="alimentacao">Alimentação</a>
-      <a href="#conta"       data-tab="conta">Conta</a>
-    </nav>
-  </div>
-</header>
 
-<main class="wrap">
-  <!-- HOME -->
-  <section id="home" class="tab">
-    <div class="card">
-      <h1>Treina com IA</h1>
-      <p class="muted">Correção de postura, contagem de repetições, planos de treino e cardápios com quantidades.</p>
-      <div class="toolbar">
-        <a class="btn" href="#conta">Criar conta</a>
-        <a class="btn ghost" href="#camera">Abrir Câmara</a>
+  <!-- ===== TOP BAR (logo à esquerda, nome da aba à direita) ===== -->
+  <header class="topbar">
+    <div class="wrap">
+      <div class="row" style="padding:10px 0;">
+        <a class="brand" href="#inicio" aria-label="AI Trainer - Início">
+          <span class="logo" aria-hidden="true"></span>
+          <span class="name">AI TRAINER</span>
+        </a>
+
+        <nav class="nav" aria-label="Navegação principal">
+          <a href="#treinos" data-label="Treinos" class="active">Treinos</a>
+          <a href="#alimentacao" data-label="Alimentação">Alimentação</a>
+          <a href="#cardio" data-label="Cardio / HIIT">Cardio</a>
+          <a href="#conta" data-label="Conta">Conta</a>
+        </nav>
+
+        <div class="nav-right">
+          <span id="pageLabel" class="page-label" aria-live="polite">Início</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section id="inicio" class="hero">
+    <div class="wrap">
+      <div class="hero-card">
+        <div class="eyebrow">Oferta de boas-vindas</div>
+        <h1>7 DIAS GRÁTIS</h1>
+        <div class="sub">+1000 inscritos já fazem parte</div>
+        <div class="cta">
+          <a class="btn btn-primary" href="#conta">COMEÇAR AGORA</a>
+          <a class="btn btn-ghost" href="#treinos">Ver treinos</a>
+          <span class="chip">Câmara com IA corrige postura em tempo real</span>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- CÂMARA -->
-  <section id="camera" class="tab hidden">
-    <div class="card">
-      <h2>Câmara + IA</h2>
-      <div style="position:relative">
-        <video id="cameraVideo" playsinline muted></video>
-        <canvas id="cameraCanvas" style="position:absolute;left:0;top:0;"></canvas>
+  <main class="wrap">
+
+    <!-- ===== TREINOS ===== -->
+    <section id="treinos">
+      <div class="grid">
+        <div class="panel">
+          <div class="kicker">Escolha</div>
+          <h2>Escolhe o teu treino</h2>
+          <div class="chips" style="margin-bottom:10px">
+            <span class="chip">Homem</span>
+            <span class="chip">Mulher</span>
+            <span class="chip">Hipertrofia</span>
+          </div>
+
+          <div class="two">
+            <div class="card">
+              <h3>Iniciante</h3>
+              <div class="list">
+                <div class="item">🏋️ Agachamento — <strong>3 × 12</strong></div>
+                <div class="item">🤸 Flexões — <strong>3 × 10</strong></div>
+                <div class="item">🧱 Prancha — <strong>3 × 30s</strong></div>
+                <div class="item">🏃 Corrida leve — <strong>10 min</strong></div>
+                <div class="item">💪 Bíceps com elástico — <strong>3 × 15</strong></div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Avançado</h3>
+              <div class="list">
+                <div class="item">🏋️‍♂️ Supino reto — <strong>4 × 10</strong></div>
+                <div class="item">🪜 Levantamento terra — <strong>4–8</strong></div>
+                <div class="item">🪢 Barra fixa — <strong>4–8</strong></div>
+                <div class="item">🏋️ Agachamento livre — <strong>5–8</strong></div>
+                <div class="item">🚴 Bike HIIT — <strong>15 min</strong></div>
+                <div class="item">💪 Ombros (halteres) — <strong>4 × 12</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="note">
+            Dica: descansa <strong>60–90 s</strong> entre séries para força/hipertrofia. Aumenta peso quando completar todas as repetições com técnica perfeita.
+          </div>
+        </div>
       </div>
-      <div class="toolbar">
-        <button id="btnStart" class="btn">Iniciar</button>
-        <button id="btnStop" class="btn ghost">Parar</button>
-        <select id="exercise" class="btn">
-          <option value="arm-right">Braço direito</option>
-          <option value="arm-left">Braço esquerdo</option>
-          <option value="squat">Agachamento</option>
-        </select>
-        <span class="pill">Estado: <strong id="camStatus">parado</strong></span>
-        <span class="pill">Reps: <strong id="reps">0</strong></span>
-        <span class="pill">Dica: <strong id="tip">—</strong></span>
+    </section>
+
+    <!-- ===== ALIMENTAÇÃO ===== -->
+    <section id="alimentacao">
+      <div class="grid">
+        <div class="panel">
+          <div class="kicker">Planos</div>
+          <h2>Planos de alimentação</h2>
+
+          <div class="water" style="margin-bottom:12px">
+            <div class="w"><strong>Ingestão mínima de água</strong> Homem: <b>3,7 L/dia</b></div>
+            <div class="w"><strong>Ingestão mínima de água</strong> Mulher: <b>2,4 L/dia</b></div>
+          </div>
+
+          <div class="cols-3">
+            <div class="card">
+              <span class="tag">Hipertrofia</span>
+              <ul style="margin:10px 0 0 18px">
+                <li>15 ovos/semana (ou claras)</li>
+                <li>200 g de frango ou peixe magro</li>
+                <li>123 g de aveia + fruta</li>
+                <li>Lanches proteicos (iogurte grego)</li>
+              </ul>
+            </div>
+            <div class="card">
+              <span class="tag">Emagrecimento</span>
+              <ul style="margin:10px 0 0 18px">
+                <li>2 porções de sopa/legumes/dia</li>
+                <li>150 g de salada variada</li>
+                <li>250 g de batata doce/arroz</li>
+                <li>Proteína magra em cada refeição</li>
+              </ul>
+            </div>
+            <div class="card">
+              <span class="tag">Vegetariano</span>
+              <ul style="margin:10px 0 0 18px">
+                <li>Leguminosas (feijão, lentilhas, grão)</li>
+                <li>Tofu/tempeh ou ovos</li>
+                <li>Cereais integrais</li>
+                <li>Oleaginosas e sementes (chia/linhaça)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="note">
+            Referência calórica (ajusta ao teu objetivo): <strong>Homem ≈ 3200 kcal/dia</strong> · <strong>Mulher ≈ 2400 kcal/dia</strong>.
+          </div>
+        </div>
       </div>
-      <p class="muted" style="margin-top:8px">Se a câmara não abrir no iPhone, usa o Safari e aceita a permissão.</p>
-    </div>
-  </section>
+    </section>
 
-  <!-- TREINOS -->
-  <section id="treinos" class="tab hidden">
-    <div class="card">
-      <h2>Planos de Treino</h2>
-      <div class="toolbar">
-        <label>Género:
-          <select id="selGenero" class="btn">
-            <option value="f">Feminino</option>
-            <option value="m">Masculino</option>
-          </select>
-        </label>
-        <label>Nível:
-          <select id="selNivel" class="btn">
-            <option value="iniciante">Iniciante (5 dias)</option>
-            <option value="avancado">Avançado (6 dias)</option>
-          </select>
-        </label>
-        <button id="btnVerPlano" class="btn">Ver Plano</button>
+    <!-- ===== CÁRDIO / HIIT ===== -->
+    <section id="cardio">
+      <div class="grid">
+        <div class="panel">
+          <div class="kicker">Cardio Programado</div>
+          <h2>Cárdio e HIIT</h2>
+
+          <div class="two">
+            <div class="card">
+              <h3>Cárdio Contínuo</h3>
+              <div class="list">
+                <div class="item">🏃 Corrida moderada — <strong>25 min</strong></div>
+                <div class="item">🚴 Bicicleta — <strong>20 min</strong> contínuos</div>
+                <div class="item">🕺 Elíptica — <strong>20 min</strong> leve</div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>HIIT (Interval Training)</h3>
+              <div class="list">
+                <div class="item">🔥 <strong>5 min</strong> rápido + <strong>2 min</strong> lento</div>
+                <div class="item">🔥 HIIT total — <strong>15 min</strong> (30s rápido / 30s lento)</div>
+                <div class="item">🪜 Escadas — <strong>10–30 min</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="note">
+            Alterna dias de cárdio contínuo e HIIT. Mantém a técnica; objetivo é somar volume semanal sem comprometer a recuperação dos treinos de força.
+          </div>
+        </div>
       </div>
-      <div id="planoOut"></div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ALIMENTAÇÃO -->
-  <section id="alimentacao" class="tab hidden">
-    <div class="card">
-      <h2>Cardápios com quantidades</h2>
-      <div class="toolbar">
-        <label>Objetivo:
-          <select id="selObj" class="btn">
-            <option value="emagrecimento">Emagrecimento</option>
-            <option value="hipertrofia">Hipertrofia</option>
-          </select>
-        </label>
-        <label>Tipo:
-          <select id="selTipo" class="btn">
-            <option value="omni">Omnívoro</option>
-            <option value="vegetariano">Vegetariano</option>
-            <option value="lactante">Lactante</option>
-          </select>
-        </label>
-        <button id="btnVerMenu" class="btn">Ver Cardápio</button>
+    <!-- ===== CONTA ===== -->
+    <section id="conta" aria-labelledby="conta-title">
+      <div class="grid">
+        <div class="panel">
+          <h2 id="conta-title">7 dias grátis — cria a tua conta</h2>
+          <div class="two">
+            <form class="card" onsubmit="event.preventDefault(); alert('Conta criada! (demo)');">
+              <div class="list" style="gap:12px">
+                <label>Nome<br><input required type="text" placeholder="O teu nome" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:#0f1016;color:#fff"></label>
+                <label>Email<br><input required type="email" placeholder="teu@email.com" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:#0f1016;color:#fff"></label>
+                <label>Senha<br><input required type="password" placeholder="••••••••" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:#0f1016;color:#fff"></label>
+                <button class="btn btn-primary" type="submit">CRIAR CONTA</button>
+              </div>
+              <p class="note">Ao criar a conta, concordas com os Termos e Privacidade.</p>
+            </form>
+
+            <div class="card">
+              <h3>Benefícios</h3>
+              <ul style="margin:10px 0 0 18px">
+                <li>Câmara com IA para corrigir postura</li>
+                <li>Planos renovados mensalmente (4 a cada 28–30 dias)</li>
+                <li>Rotinas para iniciante e avançado</li>
+                <li>Suporte por email: <a href="mailto:aitrainer55@gmail.com">aitrainer55@gmail.com</a></li>
+              </ul>
+              <div style="margin-top:12px">
+                <a class="btn btn-ghost" href="#inicio">Ver oferta</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
-      <div id="menuOut"></div>
-    </div>
-  </section>
+    </section>
 
-  <!-- CONTA -->
-  <section id="conta" class="tab hidden">
-    <div class="card">
-      <h2>Conta</h2>
-      <p>Inscrição por email estará disponível no próximo passo. Por agora, usa as áreas gratuitas.</p>
-      <a class="btn" href="#home">Voltar ao início</a>
-    </div>
-  </section>
-</main>
+  </main>
 
-<footer>© AI Trainer</footer>
+  <footer>
+    © <span id="y"></span> AI Trainer. Todos os direitos reservados.
+  </footer>
 
-<!-- TFJS + Pose Detection (CDN) -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.20.0/dist/tf-core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.20.0/dist/tf-converter.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.20.0/dist/tf-backend-webgl.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
+  <script>
+    // Atualiza o ano do rodapé
+    document.getElementById('y').textContent = new Date().getFullYear();
 
-<!-- App -->
-<script src="ia.js"></script>
-
-<script>
-  // Tabs por hash
-  const tabs = ["home","camera","treinos","alimentacao","conta"];
-  function showTab(t){
-    tabs.forEach(id=>{
-      const sec=document.getElementById(id);
-      if(sec) sec.classList.toggle("hidden", id!==t);
-      document.querySelectorAll('nav a[data-tab]').forEach(a=>{
-        a.classList.toggle("active", a.dataset.tab===t);
+    // Mantém o "nome da aba" à direita de acordo com o link clicado/visível
+    const pageLabel = document.getElementById('pageLabel');
+    const links = Array.from(document.querySelectorAll('.nav a'));
+    function setLabel(txt){
+      pageLabel.textContent = txt;
+    }
+    links.forEach(a=>{
+      a.addEventListener('click', ()=>{
+        links.forEach(x=>x.classList.remove('active'));
+        a.classList.add('active');
+        setLabel(a.dataset.label || a.textContent.trim());
       });
     });
-  }
-  window.addEventListener("hashchange", ()=>{
-    const t=(location.hash||"#home").slice(1);
-    showTab(tabs.includes(t)?t:"home");
-  });
-  showTab((location.hash||"#home").slice(1)||"home");
 
-  // Treinos
-  document.getElementById("btnVerPlano")?.addEventListener("click", async ()=>{
-    const genero=document.getElementById("selGenero").value;
-    const nivel=document.getElementById("selNivel").value;
-    const out=document.getElementById("planoOut");
-    out.innerHTML="A carregar...";
-    try{
-      const data=await (await fetch("data/planos.json",{cache:"no-store"})).json();
-      const bloco = data[genero==="f"?"feminino":"masculino"][nivel];
-      let html=`<p class="muted">${bloco.cardio||""}</p>`;
-      (bloco.dias||[]).forEach(d=>{
-        html+=`<div class="card"><h3>${d.nome}</h3><ul>`+
-              d.exercicios.map(x=>`<li>${x}</li>`).join("")+
-              `</ul></div>`;
+    // Observa a seção em foco e muda o label automaticamente ao rolar
+    const map = {
+      'treinos':'Treinos',
+      'alimentacao':'Alimentação',
+      'cardio':'Cardio / HIIT',
+      'conta':'Conta',
+      'inicio':'Início'
+    };
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          const id = e.target.id;
+          const label = map[id] || 'Início';
+          setLabel(label);
+          links.forEach(x=>x.classList.toggle('active', x.getAttribute('href') === '#' + id));
+        }
       });
-      out.innerHTML=html;
-    }catch(e){ console.error(e); out.innerHTML="<p class='muted'>Falha ao carregar plano.</p>"; }
-  });
-
-  // Cardápios
-  document.getElementById("btnVerMenu")?.addEventListener("click", async ()=>{
-    const obj=document.getElementById("selObj").value;
-    const tipo=document.getElementById("selTipo").value;
-    const out=document.getElementById("menuOut");
-    out.innerHTML="A carregar...";
-    try{
-      const data=await (await fetch("data/menus.json",{cache:"no-store"})).json();
-      const bloco = data[obj][tipo];
-      let html=`<p class="muted">${bloco.kcal||""}</p>`;
-      (bloco.refeicoes||[]).forEach(r=>{
-        html+=`<div class="card"><h3>${r.nome}</h3><ul>`+
-              r.itens.map(x=>`<li>${x}</li>`).join("")+
-              `</ul></div>`;
-      });
-      out.innerHTML=html;
-    }catch(e){ console.error(e); out.innerHTML="<p class='muted'>Falha ao carregar cardápio.</p>"; }
-  });
-</script>
+    },{threshold:.6});
+    ['inicio','treinos','alimentacao','cardio','conta'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) io.observe(el);
+    });
+  </script>
 </body>
 </html>

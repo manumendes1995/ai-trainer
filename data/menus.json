@@ -1,155 +1,38 @@
 {
-  "emagrecimento": {
-    "omni": {
-      "kcal": "≈1600–1800 kcal/dia",
-      "refeicoes": [
-        { "nome":"Pequeno-almoço", "itens":[
-          "Iogurte/Skyr 170 g",
-          "Granola 25 g",
-          "Mirtilos 80 g"
-        ]},
-        { "nome":"Almoço", "itens":[
-          "Arroz integral 2 colheres (60 g cozido)",
-          "Peito de frango grelhado 120 g",
-          "Salada mista 150 g + 1 c. sopa azeite"
-        ]},
-        { "nome":"Lanche", "itens":[
-          "Maçã 1 un (150 g)",
-          "Amêndoas 20 g"
-        ]},
-        { "nome":"Jantar", "itens":[
-          "Filete de peixe 150 g",
-          "Legumes salteados 200 g",
-          "Batata doce 120 g"
-        ]}
+  "treinos": [
+    {
+      "nivel": "Iniciante",
+      "exercicios": [
+        { "nome": "Agachamento", "series": "3 × 12" },
+        { "nome": "Flexões", "series": "3 × 10" },
+        { "nome": "Prancha", "series": "3 × 30s" },
+        { "nome": "Corrida leve", "series": "10 min" },
+        { "nome": "Bíceps com elástico", "series": "3 × 15" }
       ]
     },
-    "vegetariano": {
-      "kcal": "≈1600–1800 kcal/dia",
-      "refeicoes": [
-        { "nome":"Pequeno-almoço", "itens":[
-          "Papas de aveia 50 g aveia + 250 ml bebida vegetal",
-          "Banana 1 un (100 g)"
-        ]},
-        { "nome":"Almoço", "itens":[
-          "Tofu grelhado 150 g",
-          "Arroz integral 2 colheres (60 g cozido)",
-          "Salada 150 g + 1 c. sopa azeite"
-        ]},
-        { "nome":"Lanche", "itens":[
-          "Skyr 170 g",
-          "Nozes 15 g"
-        ]},
-        { "nome":"Jantar", "itens":[
-          "Feijão 120 g",
-          "Quinoa 70 g cozida",
-          "Legumes 200 g"
-        ]}
-      ]
-    },
-    "lactante": {
-      "kcal": "≈1800–2000 kcal/dia",
-      "refeicoes": [
-        { "nome":"Pequeno-almoço", "itens":[
-          "Pão integral 2 fatias (60 g)",
-          "Queijo fresco 60 g",
-          "Sumo natural 200 ml"
-        ]},
-        { "nome":"Almoço", "itens":[
-          "Arroz 80 g cozido (≈2,5 colheres)",
-          "Carne magra 130 g",
-          "Salada 200 g + 1 c. sopa azeite"
-        ]},
-        { "nome":"Lanche", "itens":[
-          "Iogurte natural 170 g",
-          "Fruta 150 g"
-        ]},
-        { "nome":"Jantar", "itens":[
-          "Peixe 160 g",
-          "Batata 150 g",
-          "Legumes 200 g"
-        ]}
+    {
+      "nivel": "Avançado",
+      "exercicios": [
+        { "nome": "Supino reto", "series": "4 × 10" },
+        { "nome": "Levantamento terra", "series": "4–8" },
+        { "nome": "Barra fixa", "series": "4–8" },
+        { "nome": "Agachamento livre", "series": "5–8" },
+        { "nome": "Bike HIIT", "series": "15 min" },
+        { "nome": "Ombros (halteres)", "series": "4 × 12" }
       ]
     }
-  },
+  ],
 
-  "hipertrofia": {
-    "omni": {
-      "kcal": "≈2200–2600 kcal/dia",
-      "refeicoes": [
-        { "nome":"Pequeno-almoço", "itens":[
-          "Ovos mexidos 3 un (≈150 g)",
-          "Aveia 60 g",
-          "Leite 250 ml"
-        ]},
-        { "nome":"Almoço", "itens":[
-          "Arroz 150 g cozido (≈4–5 colheres)",
-          "Carne/Frango 180 g",
-          "Legumes 200 g",
-          "Azeite 1 c. sopa"
-        ]},
-        { "nome":"Lanche", "itens":[
-          "Skyr 170 g",
-          "Banana 1 un (100 g)",
-          "Amendoim 20 g"
-        ]},
-        { "nome":"Jantar", "itens":[
-          "Massa 150 g cozida",
-          "Atum/Peixe 180 g",
-          "Salada 150 g + 1 c. sopa azeite"
-        ]}
-      ]
-    },
-    "vegetariano": {
-      "kcal": "≈2200–2600 kcal/dia",
-      "refeicoes": [
-        { "nome":"Pequeno-almoço", "itens":[
-          "Panquecas aveia (80 g aveia + 2 ovos ou substituto)",
-          "Fruta 150 g"
-        ]},
-        { "nome":"Almoço", "itens":[
-          "Tofu/Seitan 180 g",
-          "Arroz 150 g cozido",
-          "Legumes 200 g",
-          "Azeite 1 c. sopa"
-        ]},
-        { "nome":"Lanche", "itens":[
-          "Iogurte 170 g",
-          "Granola 30 g"
-        ]},
-        { "nome":"Jantar", "itens":[
-          "Feijão/Grão 150 g",
-          "Quinoa 120 g cozida",
-          "Legumes 200 g"
-        ]}
-      ]
-    },
-    "lactante": {
-      "kcal": "≈2300–2700 kcal/dia",
-      "refeicoes": [
-        { "nome":"Pequeno-almoço", "itens":[
-          "Pão integral 2–3 fatias (90 g)",
-          "Queijo/Fiambre magro 80 g",
-          "Leite 250 ml"
-        ]},
-        { "nome":"Almoço", "itens":[
-          "Arroz 180 g cozido (≈5–6 colheres)",
-          "Carne magra 180 g",
-          "Legumes 200 g",
-          "Azeite 1 c. sopa"
-        ]},
-        { "nome":"Lanche", "itens":[
-          "Iogurte 170 g",
-          "Fruta 150 g",
-          "Frutos secos 20 g"
-        ]},
-        { "nome":"Jantar", "itens":[
-          "Batata 200 g",
-          "Peixe 200 g",
-          "Legumes 200 g",
-          "Azeite 1 c. sopa"
-        ]}
-      ]
-    }
+  "cardio": {
+    "continuo": [
+      { "nome": "Corrida moderada", "tempo": "25 min" },
+      { "nome": "Bicicleta contínua", "tempo": "20 min" },
+      { "nome": "Elíptica leve", "tempo": "20 min" }
+    ],
+    "hiit": [
+      { "nome": "5 min rápido + 2 min lento", "tempo": "×3–4 ciclos" },
+      { "nome": "HIIT total", "tempo": "15 min (30s rápido / 30s lento)" },
+      { "nome": "Escadas", "tempo": "10–30 min" }
+    ]
   }
 }
